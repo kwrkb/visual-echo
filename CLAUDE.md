@@ -52,12 +52,20 @@ All database operations are type-safe via `types/database.ts`:
 
 ### Image Generation: Gemini API
 
-Image generation uses Google Gemini API (`lib/gemini/client.ts`). Note: The current implementation is a placeholder. The actual image generation logic needs to be implemented based on Gemini's image generation capabilities (Imagen or similar).
+Image generation uses **Google Gemini 2.5 Flash Image** model via `@google/genai` SDK (`lib/gemini/client.ts`).
 
-**Important**: Generated image URLs from external APIs are temporary. Production code should:
-1. Download the generated image
-2. Upload to Supabase Storage
-3. Store the permanent Supabase Storage URL in `generations.image_url`
+**Implementation details**:
+- Uses `gemini-2.5-flash-image` model for image generation
+- Generated images are saved locally in `public/images/generated/` directory
+- Image URLs are stored as `/images/generated/{timestamp}-{random}.png`
+- Images are generated asynchronously in background via Server Actions
+
+**Background generation flow**:
+1. Server Action creates a `pending` generation record
+2. Returns immediately with the generation ID
+3. Background function generates image via Gemini API
+4. Downloads base64 image data and saves to local filesystem
+5. Updates generation record to `completed` status with image URL
 
 ## Commands
 
@@ -164,11 +172,34 @@ The intended game loop is:
 1. User views an image (without seeing its parent or prompt history)
 2. User enters a text description of what they see
 3. System creates a `pending` generation record with the prompt
-4. System calls Gemini API to generate a new image
-5. System uploads image to storage and updates record to `completed`
-6. User can now view the historical chain leading to their contribution
+4. User is redirected to generating page which polls for completion
+5. System calls Gemini API to generate a new image in background
+6. System saves image to local filesystem and updates record to `completed`
+7. User is redirected to result page showing the transformation chain
+8. User can now view the historical chain leading to their contribution
 
 **Status field usage**:
 - `pending`: Generation request created but image not yet generated
 - `completed`: Image successfully generated and stored
 - `failed`: Image generation failed (store error details separately if needed)
+
+## Implemented Features
+
+### Gallery Display
+- Shows up to 3 most recent completed images
+- Implements parent-based deduplication: for images with same parent, only shows the latest
+- Root images (parent_id = null) are all included in the display
+- Located at `/gallery` route
+
+### Image Detail & Generation Flow
+- Detail page shows image, original prompt, and metadata
+- Users can input new prompts to generate child images
+- Child images are displayed in a grid below the parent
+- Generation status page polls database every 2 seconds
+- Result page shows before/after transformation when parent exists
+
+### UI Styling
+- Dark text colors for readability (text-gray-900 for main text, text-gray-700 for subtitles)
+- Responsive grid layouts with hover effects
+- Image cards with aspect-ratio preservation
+- Smooth transitions and animations

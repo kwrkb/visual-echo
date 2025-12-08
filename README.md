@@ -15,18 +15,22 @@ Visual Echo は、生成AIを活用した「非同期・分岐型」の連想ゲ
 | Frontend | Next.js (App Router) | UI構築, Vercelへのデプロイ |
 | Backend | Next.js API Routes | サーバーレス関数としてのバックエンド処理 |
 | Database | Supabase (PostgreSQL) | ゲームデータおよび画像URLの管理 |
-| Storage | Supabase Storage | 生成された画像の永続化 (生成画像の一時性を回避) |
-| AI Model | Google Gemini API | Text-to-Image 生成 |
+| Storage | Local Filesystem | 生成された画像の保存 (public/images/generated/) |
+| AI Model | Google Gemini 2.5 Flash Image | Text-to-Image 生成 |
 | Styling | Tailwind CSS | 高速なUIスタイリング |
 📐 システム構成 (Architecture)
 データフロー
-graph TD
-    User[User] -->|1. 説明テキスト送信| NextAPI[Next.js API]
-    NextAPI -->|2. Prompt送信| Gemini[Google Gemini]
-    Gemini -->|3. 画像生成 & URL返却| NextAPI
-    NextAPI -->|4. 画像保存| Storage[Supabase Storage]
-    NextAPI -->|5. メタデータ保存| DB[(Supabase DB)]
-    DB -->|6. 履歴データ返却| User
+```
+User[User] -->|1. 説明テキスト送信| ServerAction[Next.js Server Action]
+ServerAction -->|2. Pending生成レコード作成| DB[(Supabase DB)]
+ServerAction -->|3. 非同期で画像生成開始| Background[Background Process]
+Background -->|4. Prompt送信| Gemini[Google Gemini 2.5 Flash Image]
+Gemini -->|5. 画像データ返却 (Base64)| Background
+Background -->|6. 画像保存| LocalFS[Local Filesystem]
+Background -->|7. メタデータ更新 (completed)| DB
+User -->|8. ポーリングで状態確認| DB
+DB -->|9. 履歴データ返却| User
+```
 
 🗃 データベース設計 (Schema)
 generations テーブル単体で自己参照（Adjacency List）を行い、ツリー構造を表現します。
@@ -43,17 +47,23 @@ generations テーブル単体で自己参照（Adjacency List）を行い、ツ
    * Next.jsプロジェクトの作成
    * Supabaseプロジェクトの作成と接続
    * Gemini APIキーの設定
- * [ ] Phase 2: Core Logic (MVP)
-   * 画像表示機能の実装
+ * [x] Phase 2: Core Logic (MVP)
+   * 画像表示機能の実装（ギャラリー、詳細ページ）
    * テキスト入力フォームとDB保存の実装
-   * Gemini API連携による画像生成機能の実装
- * [ ] Phase 3: Storage Integration
-   * 生成画像のSupabase Storageへのアップロード処理
- * [ ] Phase 4: UI/UX Refinement
+   * Gemini 2.5 Flash Image API連携による画像生成機能の実装
+   * バックグラウンド画像生成とポーリングによるステータス確認
+ * [x] Phase 3: Storage Integration
+   * 生成画像のローカルファイルシステムへの保存
+ * [x] Phase 4: UI/UX Refinement (Part 1)
+   * 子画像一覧表示の実装
+   * テキスト可読性の改善（ダークカラーの適用）
+   * ローディング画面とリザルト画面の実装
+ * [ ] Phase 4: UI/UX Refinement (Part 2)
    * 履歴（ツリー）表示画面の実装
-   * ローディング等のインタラクション改善
+   * ギャラリーフィルタリングロジックの改善
  * [ ] Phase 5: Deploy
    * Vercelへの本番デプロイ
+   * Supabase Storageへの移行（本番環境用）
 💻 セットアップ (Local Development)
 # 1. Clone repository
 git clone https://github.com/your-username/visual-echo.git

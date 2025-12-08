@@ -3,48 +3,71 @@
  * 画像生成に使用するGemini APIクライアント
  */
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
+import * as fs from "fs";
+import * as path from "path";
 
 if (!process.env.GEMINI_API_KEY) {
   throw new Error("GEMINI_API_KEY is not set in environment variables");
 }
 
 // Gemini APIクライアントを初期化
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-/**
- * 画像生成用のモデルを取得
- * デフォルトは gemini-2.0-flash-exp
- */
-export function getGenerativeModel() {
-  const modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash-exp";
-  return genAI.getGenerativeModel({ model: modelName });
-}
+const genAI = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
 
 /**
  * テキストプロンプトから画像を生成
  * @param prompt - 画像生成用のテキストプロンプト
- * @returns 生成された画像のURL
+ * @returns 生成された画像のローカルパス（/images/generated/以下）
  */
 export async function generateImage(prompt: string): Promise<string> {
-  const model = getGenerativeModel();
-
-  // Note: Gemini 2.0のイメージ生成機能を使用する場合は
-  // 適切なAPIメソッドを実装してください
-  // 以下はプレースホルダーです
   try {
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const text = response.text();
+    console.log("Generating image with Gemini...", prompt);
 
-    // 実際の実装では、生成された画像のURLを返す必要があります
-    // ここでは仮の実装です
-    console.log("Generated response:", text);
+    // Gemini 2.5 Flash Image モデルを使用
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-flash-image",
+      contents: prompt,
+    });
 
-    // TODO: 実際の画像生成APIエンドポイントを使用する
-    throw new Error("Image generation not yet implemented for Gemini");
-  } catch (error) {
+    // 生成された画像を取得
+    for (const part of response.candidates[0].content.parts) {
+      if (part.inlineData) {
+        // Base64エンコードされた画像データを取得
+        const imageData = part.inlineData.data;
+        const buffer = Buffer.from(imageData, "base64");
+
+        // 画像を保存するディレクトリ
+        const publicDir = path.join(process.cwd(), "public", "images", "generated");
+        if (!fs.existsSync(publicDir)) {
+          fs.mkdirSync(publicDir, { recursive: true });
+        }
+
+        // ファイル名を生成（タイムスタンプ + ランダム文字列）
+        const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.png`;
+        const filepath = path.join(publicDir, filename);
+
+        // 画像を保存
+        fs.writeFileSync(filepath, buffer);
+
+        console.log("Image generated successfully:", filename);
+
+        // 公開URLを返す
+        return `/images/generated/${filename}`;
+      }
+    }
+
+    throw new Error("No image data found in response");
+  } catch (error: any) {
     console.error("Error generating image:", error);
-    throw error;
+
+    // APIクォータエラーの場合、分かりやすいメッセージを表示
+    if (error?.status === 429) {
+      throw new Error("API クォータ制限に達しました。しばらく待ってから再試行してください。");
+    }
+
+    // その他のエラー
+    throw new Error(`画像生成エラー: ${error?.message || "不明なエラー"}`);
   }
 }
