@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
-import { ImageGrid } from './components/ImageGrid';
+import { ImageGrid } from '../components/ImageGrid';
 import Link from 'next/link';
 
-export default async function GalleryPage() {
+export default async function AllGalleryPage() {
   const supabase = await createClient();
 
   // 完了済みの画像を全て取得（新しい順）
@@ -26,33 +26,25 @@ export default async function GalleryPage() {
     );
   }
 
-  // 全画像からランダムに3枚選択
-  const shuffled = [...(allGenerations || [])].sort(() => Math.random() - 0.5);
-  const displayGenerations = shuffled.slice(0, 3);
-
   return (
     <main className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                Visual Echo ギャラリー
-              </h1>
-              <p className="text-gray-900">
-                AI が生成した画像の連鎖を探索しましょう（ランダムで3枚表示中）
-              </p>
-            </div>
-            <Link
-              href="/gallery/all"
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors whitespace-nowrap"
-            >
-              全て表示
-            </Link>
-          </div>
+          <Link
+            href="/gallery"
+            className="text-blue-600 hover:text-blue-700 flex items-center gap-2 mb-4"
+          >
+            ← ギャラリーに戻る
+          </Link>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            全ての作品
+          </h1>
+          <p className="text-gray-900">
+            生成された全ての画像（{allGenerations?.length || 0}枚）
+          </p>
         </div>
 
-        <ImageGrid generations={displayGenerations} />
+        <ImageGrid generations={allGenerations || []} />
       </div>
     </main>
   );

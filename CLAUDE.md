@@ -56,9 +56,11 @@ Image generation uses **Google Gemini 2.5 Flash Image** model via `@google/genai
 
 **Implementation details**:
 - Uses `gemini-2.5-flash-image` model for image generation
+- High temperature (1.5) and sampling parameters for creative, diverse outputs
 - Generated images are saved locally in `public/images/generated/` directory
 - Image URLs are stored as `/images/generated/{timestamp}-{random}.png`
 - Images are generated asynchronously in background via Server Actions
+- Generated images are excluded from git via `.gitignore`
 
 **Background generation flow**:
 1. Server Action creates a `pending` generation record
@@ -186,14 +188,17 @@ The intended game loop is:
 ## Implemented Features
 
 ### Gallery Display
-- Shows up to 3 most recent completed images
-- Implements parent-based deduplication: for images with same parent, only shows the latest
-- Root images (parent_id = null) are all included in the display
-- Located at `/gallery` route
+- Main gallery (`/gallery`) shows 3 random completed images
+- "全て表示" button links to `/gallery/all` showing all images
+- Random selection refreshes on each page load for discovery
+- All images page (`/gallery/all`) displays chronological list
 
 ### Image Detail & Generation Flow
 - Detail page shows image, original prompt, and metadata
 - Users can input new prompts to generate child images
+- **Image Lineage**: Visual timeline showing the full ancestry from root to current image
+  - Displays generation number badges with connecting vertical line
+  - Each ancestor is clickable to navigate through the tree
 - Child images are displayed in a grid below the parent
 - Generation status page polls database every 2 seconds
 - Result page shows before/after transformation when parent exists

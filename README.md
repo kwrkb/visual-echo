@@ -58,9 +58,10 @@ generations テーブル単体で自己参照（Adjacency List）を行い、ツ
    * 子画像一覧表示の実装
    * テキスト可読性の改善（ダークカラーの適用）
    * ローディング画面とリザルト画面の実装
- * [ ] Phase 4: UI/UX Refinement (Part 2)
-   * 履歴（ツリー）表示画面の実装
-   * ギャラリーフィルタリングロジックの改善
+ * [x] Phase 4: UI/UX Refinement (Part 2)
+   * 画像系譜（リニエージ）表示の実装
+   * ギャラリーランダム表示と全画像表示ページの実装
+   * 画像生成パラメータの調整（ランダム性向上）
  * [ ] Phase 5: Deploy
    * Vercelへの本番デプロイ
    * Supabase Storageへの移行（本番環境用）

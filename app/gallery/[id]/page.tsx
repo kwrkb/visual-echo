@@ -4,9 +4,33 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { PromptForm } from './components/PromptForm';
 import { ChildImages } from './components/ChildImages';
+import { ImageLineage } from './components/ImageLineage';
+import type { Generation } from '@/types/database';
 
 interface PageProps {
   params: Promise<{ id: string }>;
+}
+
+// 親を遡って系譜を取得する関数
+async function getLineage(supabase: any, generationId: string): Promise<Generation[]> {
+  const lineage: Generation[] = [];
+  let currentId: string | null = generationId;
+
+  while (currentId) {
+    const { data, error } = await supabase
+      .from('generations')
+      .select('*')
+      .eq('id', currentId)
+      .single();
+
+    if (error || !data) break;
+
+    lineage.unshift(data); // 先頭に追加（古い順になる）
+
+    currentId = data.parent_id;
+  }
+
+  return lineage;
 }
 
 export default async function GenerationDetailPage({ params }: PageProps) {
@@ -23,6 +47,9 @@ export default async function GenerationDetailPage({ params }: PageProps) {
   if (error || !generation) {
     notFound();
   }
+
+  // 系譜を取得（ルートから現在の画像まで）
+  const lineage = await getLineage(supabase, id);
 
   // 子画像を取得（この画像から生成された画像）
   const { data: childGenerations } = await supabase
@@ -84,13 +111,6 @@ export default async function GenerationDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* 重要: 親画像の履歴は非表示（ゲーム性のため） */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-blue-800 text-sm">
-                💡 <strong>ヒント:</strong> この画像がどこから来たのかは、
-                あなたが新しい画像を生成するまで秘密です！
-              </p>
-            </div>
           </div>
 
           {/* 右側: プロンプト入力フォーム */}
@@ -98,6 +118,9 @@ export default async function GenerationDetailPage({ params }: PageProps) {
             <PromptForm parentId={generation.id} />
           </div>
         </div>
+
+        {/* 系譜表示 */}
+        {lineage.length > 1 && <ImageLineage lineage={lineage} />}
 
         {/* 子画像一覧 */}
         <ChildImages children={childGenerations || []} />
