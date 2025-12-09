@@ -62,7 +62,12 @@ generations テーブル単体で自己参照（Adjacency List）を行い、ツ
    * 画像系譜（リニエージ）表示の実装
    * ギャラリーランダム表示と全画像表示ページの実装
    * 画像生成パラメータの調整（ランダム性向上）
- * [ ] Phase 5: Deploy
+ * [x] Phase 5: Tree Visualization (New!)
+   * 再帰的CTEを使用したデータベース関数 (`get_tree_structure`) の実装
+   * ツリー全体を俯瞰できるインタラクティブなツリービュー (`/tree`) の実装
+   * ズーム機能とスムーズなナビゲーション
+ * [ ] Phase 6: Future Improvements
+   * 初期画像（ルートノード）の生成機能
    * Vercelへの本番デプロイ
    * Supabase Storageへの移行（本番環境用）
 💻 セットアップ (Local Development)
@@ -80,5 +85,9 @@ cp .env.local.example .env.local
 # - NEXT_PUBLIC_SUPABASE_ANON_KEY
 # - GEMINI_API_KEY
 
-# 4. Run development server
+# 4. Database Setup (RPC Function)
+# Supabase DashboardのSQL Editorで `supabase/migrations/tree_rpc.sql` を実行してください。
+# これにより、ツリー構造を取得するための関数が作成されます。
+
+# 5. Run development server
 npm run dev
