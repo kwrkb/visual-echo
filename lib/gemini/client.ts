@@ -25,10 +25,11 @@ export async function generateImage(prompt: string): Promise<string> {
   try {
     console.log("Generating image with Gemini...", prompt);
 
-    // Gemini 2.5 Flash Image モデルを使用
+    // Gemini 2.5 Flash Image モデルを使用 (環境変数で設定可能)
     // temperatureを高めに設定して、より多様でクリエイティブな画像を生成
+    const model = process.env.GEMINI_MODEL || "gemini-2.5-flash-image";
     const response = await genAI.models.generateContent({
-      model: "gemini-2.5-flash-image",
+      model: model,
       contents: prompt,
       config: {
         temperature: 1.5, // 0.0-2.0の範囲。高いほどランダム性が増す
