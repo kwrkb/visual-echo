@@ -13,6 +13,7 @@ export default async function TreePage() {
     // 全てのルートノードとその子孫を取得
     const treeData = await fetchTreeDataServer(null);
 
+
     return (
         <div className="h-screen w-screen overflow-hidden flex flex-col">
             <header className="flex-none p-4 bg-white border-b border-gray-200 z-10 shadow-sm flex justify-between items-center">

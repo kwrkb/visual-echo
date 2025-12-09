@@ -26,7 +26,18 @@ export default function TreeNodeComponent({ node }: TreeNodeProps) {
             >
                 <div className="aspect-[3/4] relative bg-gray-100">
                     {/* 画像表示 */}
-                    {node.image_url ? (
+                    {/* 画像表示ロジック */}
+                    {node.status === 'pending' ? (
+                        <div className="flex h-full flex-col items-center justify-center bg-gray-50 text-yellow-600 gap-2">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500"></div>
+                            <span className="text-xs font-medium">生成中...</span>
+                        </div>
+                    ) : node.status === 'failed' ? (
+                        <div className="flex h-full flex-col items-center justify-center bg-red-50 text-red-500 gap-2">
+                            <span className="text-2xl">❌</span>
+                            <span className="text-xs font-medium">生成失敗</span>
+                        </div>
+                    ) : node.image_url ? (
                         <Image
                             src={node.image_url}
                             alt={node.prompt || "Generated Image"}

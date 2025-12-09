@@ -48,7 +48,10 @@ export async function fetchTreeDataServer(rootId?: string | null): Promise<TreeN
         return [];
     }
 
-    return buildTreeFromFlatData(data || []);
+    // 完了していないノード（pending/failed）を除外
+    const filteredData = (data || []).filter(node => node.status === 'completed');
+
+    return buildTreeFromFlatData(filteredData);
 }
 
 /**
@@ -66,5 +69,8 @@ export async function fetchTreeDataClient(rootId?: string | null): Promise<TreeN
         return [];
     }
 
-    return buildTreeFromFlatData(data || []);
+    // 完了していないノード（pending/failed）を除外
+    const filteredData = (data || []).filter(node => node.status === 'completed');
+
+    return buildTreeFromFlatData(filteredData);
 }
