@@ -11,11 +11,9 @@ interface PageProps {
 export default function GeneratingPage({ params }: PageProps) {
   const router = useRouter();
   const [status, setStatus] = useState<'pending' | 'completed' | 'failed'>('pending');
-  const [id, setId] = useState<string>('');
 
   useEffect(() => {
     params.then(({ id: generationId }) => {
-      setId(generationId);
 
       const supabase = createClient();
       // eslint-disable-next-line prefer-const

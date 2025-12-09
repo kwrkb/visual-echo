@@ -98,7 +98,7 @@ Required environment variables (see `.env.local.example`):
 NEXT_PUBLIC_SUPABASE_URL=         # Supabase project URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY=    # Supabase anon/public key
 GEMINI_API_KEY=                    # Google Gemini API key
-GEMINI_MODEL=gemini-2.0-flash-exp  # Optional: model version
+GEMINI_MODEL=gemini-2.5-flash-image  # Optional: model version
 ```
 
 **Database setup**: Run `supabase/schema.sql` in Supabase SQL Editor before first use.

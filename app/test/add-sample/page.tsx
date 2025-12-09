@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createTestGeneration } from '@/app/actions/generations';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function AddSamplePage() {
   const router = useRouter();
@@ -65,11 +66,14 @@ export default function AddSamplePage() {
         <div className="grid md:grid-cols-2 gap-6">
           {sampleImages.map((sample, index) => (
             <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-              <img
-                src={sample.url}
-                alt={sample.prompt}
-                className="w-full h-64 object-cover"
-              />
+              <div className="relative w-full h-64">
+                <Image
+                  src={sample.url}
+                  alt={sample.prompt}
+                  fill
+                  className="object-cover"
+                />
+              </div>
               <div className="p-4">
                 <p className="text-gray-700 mb-4">{sample.prompt}</p>
                 <button

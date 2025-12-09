@@ -4,6 +4,9 @@
 -- Enable UUID extension (通常は既に有効)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- 生成ステータスのENUM型定義
+CREATE TYPE generation_status AS ENUM ('pending', 'completed', 'failed');
+
 -- Generations テーブル
 -- 画像生成の履歴と連鎖を管理
 CREATE TABLE IF NOT EXISTS generations (
@@ -23,7 +26,7 @@ CREATE TABLE IF NOT EXISTS generations (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
   -- 生成ステータス
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'failed'))
+  status generation_status NOT NULL DEFAULT 'pending'
 );
 
 -- インデックス: parent_idでの検索を高速化（子画像の取得用）
