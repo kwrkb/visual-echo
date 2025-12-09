@@ -38,8 +38,18 @@ export async function generateImage(prompt: string): Promise<string> {
     });
 
     // 生成された画像を取得
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) {
+    const candidates = response.candidates;
+    if (!candidates || candidates.length === 0) {
+      throw new Error("No candidates in response");
+    }
+
+    const parts = candidates[0].content?.parts;
+    if (!parts) {
+      throw new Error("No content parts in response");
+    }
+
+    for (const part of parts) {
+      if (part.inlineData && part.inlineData.data) {
         // Base64エンコードされた画像データを取得
         const imageData = part.inlineData.data;
         const buffer = Buffer.from(imageData, "base64");

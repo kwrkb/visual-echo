@@ -56,7 +56,21 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      get_tree_structure: {
+        Args: {
+          root_id?: string | null;
+        };
+        Returns: {
+          id: string;
+          parent_id: string | null;
+          image_url: string;
+          prompt: string;
+          created_at: string;
+          status: Database["public"]["Enums"]["generation_status"];
+          depth: number;
+          path: string[];
+        }[];
+      };
     };
     Enums: {
       generation_status: "pending" | "completed" | "failed";
@@ -72,3 +86,8 @@ export type Generation = Database["public"]["Tables"]["generations"]["Row"];
 export type GenerationInsert = Database["public"]["Tables"]["generations"]["Insert"];
 export type GenerationUpdate = Database["public"]["Tables"]["generations"]["Update"];
 export type GenerationStatus = Database["public"]["Enums"]["generation_status"];
+export type TreeGeneration = Database["public"]["Functions"]["get_tree_structure"]["Returns"][0];
+
+export interface TreeNode extends TreeGeneration {
+  children?: TreeNode[];
+}

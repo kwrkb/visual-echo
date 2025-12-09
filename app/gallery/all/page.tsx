@@ -36,12 +36,23 @@ export default async function AllGalleryPage() {
           >
             ← ギャラリーに戻る
           </Link>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            全ての作品
-          </h1>
-          <p className="text-gray-900">
-            生成された全ての画像（{allGenerations?.length || 0}枚）
-          </p>
+          <div className="flex justify-between items-end mb-2">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                全ての作品
+              </h1>
+              <p className="text-gray-900">
+                生成された全ての画像（{allGenerations?.length || 0}枚）
+              </p>
+            </div>
+            <Link
+              href="/tree"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 shadow-sm"
+            >
+              <span>🌳</span>
+              <span>ツリー表示で見る</span>
+            </Link>
+          </div>
         </div>
 
         <ImageGrid generations={allGenerations || []} />

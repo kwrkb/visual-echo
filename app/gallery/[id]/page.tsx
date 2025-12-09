@@ -11,8 +11,11 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+import { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@/types/database';
+
 // 親を遡って系譜を取得する関数
-async function getLineage(supabase: any, generationId: string): Promise<Generation[]> {
+async function getLineage(supabase: SupabaseClient<Database>, generationId: string): Promise<Generation[]> {
   const lineage: Generation[] = [];
   let currentId: string | null = generationId;
 
@@ -21,7 +24,7 @@ async function getLineage(supabase: any, generationId: string): Promise<Generati
       .from('generations')
       .select('*')
       .eq('id', currentId)
-      .single();
+      .single<Generation>();
 
     if (error || !data) break;
 
@@ -97,13 +100,12 @@ export default async function GenerationDetailPage({ params }: PageProps) {
                   </span>
                   <span className="flex items-center gap-1">
                     <span
-                      className={`inline-block w-2 h-2 rounded-full ${
-                        generation.status === 'completed'
-                          ? 'bg-green-500'
-                          : generation.status === 'pending'
+                      className={`inline-block w-2 h-2 rounded-full ${generation.status === 'completed'
+                        ? 'bg-green-500'
+                        : generation.status === 'pending'
                           ? 'bg-yellow-500'
                           : 'bg-red-500'
-                      }`}
+                        }`}
                     />
                     {generation.status}
                   </span>

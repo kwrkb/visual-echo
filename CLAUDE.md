@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Meta Rules
+
+1. **Primary Instruction File**: This file (`CLAUDE.md`) is the authoritative source of truth for this project.
+2. **Ignore GEMINI.md**: Do not use `GEMINI.md` for project instructions.
+3. **Language**: Communicate in Japanese for all tasks unless asked otherwise.
+4. **Artifacts**: Write all artifacts (implementation_plan, walkthrough) in Japanese.
+
 ## Project Overview
 
 **Visual Echo** is an asynchronous, branching image association game powered by AI. Players describe an image in text, and the AI (Google Gemini) generates a new image from that description. This creates a tree structure of visual transformations, similar to Git branches.
