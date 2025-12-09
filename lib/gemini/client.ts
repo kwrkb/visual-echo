@@ -75,6 +75,7 @@ export async function generateImage(prompt: string): Promise<string> {
     }
 
     throw new Error("No image data found in response");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Error generating image:", error);
 

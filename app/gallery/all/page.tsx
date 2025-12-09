@@ -45,13 +45,22 @@ export default async function AllGalleryPage() {
                 生成された全ての画像（{allGenerations?.length || 0}枚）
               </p>
             </div>
-            <Link
-              href="/tree"
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 shadow-sm"
-            >
-              <span>🌳</span>
-              <span>ツリー表示で見る</span>
-            </Link>
+            <div className="flex gap-2">
+              <Link
+                href="/create"
+                className="px-4 py-2 bg-white text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition flex items-center gap-2 shadow-sm"
+              >
+                <span>✨</span>
+                <span>新規作成</span>
+              </Link>
+              <Link
+                href="/tree"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-2 shadow-sm"
+              >
+                <span>🌳</span>
+                <span>ツリー表示で見る</span>
+              </Link>
+            </div>
           </div>
         </div>
 

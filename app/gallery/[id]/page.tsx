@@ -20,17 +20,18 @@ async function getLineage(supabase: SupabaseClient<Database>, generationId: stri
   let currentId: string | null = generationId;
 
   while (currentId) {
-    const { data, error } = await supabase
+    const response = await supabase
       .from('generations')
       .select('*')
       .eq('id', currentId)
-      .single<Generation>();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .single() as { data: Generation | null; error: any };
 
-    if (error || !data) break;
+    if (response.error || !response.data) break;
 
-    lineage.unshift(data); // 先頭に追加（古い順になる）
+    lineage.unshift(response.data); // 先頭に追加（古い順になる）
 
-    currentId = data.parent_id;
+    currentId = response.data.parent_id;
   }
 
   return lineage;
@@ -125,7 +126,7 @@ export default async function GenerationDetailPage({ params }: PageProps) {
         {lineage.length > 1 && <ImageLineage lineage={lineage} />}
 
         {/* 子画像一覧 */}
-        <ChildImages children={childGenerations || []} />
+        <ChildImages generations={childGenerations || []} />
       </div>
     </main>
   );

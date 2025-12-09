@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createGeneration } from '@/app/actions/generations';
 
 interface PromptFormProps {
-  parentId: string;
+  parentId: string | null;
 }
 
 export function PromptForm({ parentId }: PromptFormProps) {
@@ -31,12 +31,15 @@ export function PromptForm({ parentId }: PromptFormProps) {
     }
   };
 
+  const isInitial = !parentId;
+
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold mb-4">この画像を説明してみましょう</h2>
+      <h2 className="text-2xl font-bold mb-4">{isInitial ? '新しいお題を作る' : 'この画像を説明してみましょう'}</h2>
       <p className="text-gray-900 mb-6 text-sm">
-        この画像が何を表しているか、あなたの言葉で説明してください。
-        あなたの説明から、AIが新しい画像を生成します。
+        {isInitial
+          ? 'あなたの想像力で新しいストーリーを始めましょう。どんな画像を作りたいですか？'
+          : 'この画像が何を表しているか、あなたの言葉で説明してください。あなたの説明から、AIが新しい画像を生成します。'}
       </p>
 
       {error && (

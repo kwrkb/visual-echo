@@ -22,8 +22,17 @@ export default async function TreePage() {
                     </Link>
                     <h1 className="text-xl font-bold text-gray-800">Imagination Tree</h1>
                 </div>
-                <div className="text-sm text-gray-500">
-                    Showing all generation paths
+                <div className="flex items-center gap-4">
+                    <div className="text-sm text-gray-500 hidden sm:block">
+                        Showing all generation paths
+                    </div>
+                    <Link
+                        href="/create"
+                        className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition flex items-center gap-1 shadow-sm"
+                    >
+                        <span>✨</span>
+                        <span>新規作成</span>
+                    </Link>
                 </div>
             </header>
 

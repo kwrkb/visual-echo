@@ -3,21 +3,21 @@ import Image from 'next/image';
 import type { Generation } from '@/types/database';
 
 interface ChildImagesProps {
-  children: Generation[];
+  generations: Generation[];
 }
 
-export function ChildImages({ children }: ChildImagesProps) {
-  if (children.length === 0) {
+export function ChildImages({ generations }: ChildImagesProps) {
+  if (generations.length === 0) {
     return null;
   }
 
   return (
     <div className="mt-12">
       <h2 className="text-2xl font-bold mb-6 text-gray-900">
-        この画像から生まれた作品（{children.length}）
+        この画像から生まれた作品（{generations.length}）
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {children.map((child) => (
+        {generations.map((child) => (
           <Link
             key={child.id}
             href={`/gallery/${child.id}`}

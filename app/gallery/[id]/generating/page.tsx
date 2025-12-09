@@ -18,6 +18,7 @@ export default function GeneratingPage({ params }: PageProps) {
       setId(generationId);
 
       const supabase = createClient();
+      // eslint-disable-next-line prefer-const
       let pollInterval: NodeJS.Timeout;
 
       // ポーリングでステータスを確認
