@@ -1,97 +1,99 @@
-import Link from 'next/link';
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 font-sans text-slate-900">
-
+    <div className="min-h-screen bg-ve-bg">
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 text-center">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <h1 className="text-6xl md:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      <section className="pt-24 pb-20 px-4 text-center relative overflow-hidden">
+        {/* Ripple SVG background */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+          <svg width="600" height="600" viewBox="0 0 600 600" className="opacity-[0.06]">
+            <circle cx="300" cy="300" r="80" stroke="var(--ve-accent)" strokeWidth="1" fill="none">
+              <animate attributeName="r" values="80;250" dur="4s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.6;0" dur="4s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="300" cy="300" r="80" stroke="var(--ve-accent)" strokeWidth="1" fill="none">
+              <animate attributeName="r" values="80;250" dur="4s" begin="1.3s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.6;0" dur="4s" begin="1.3s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="300" cy="300" r="80" stroke="var(--ve-accent)" strokeWidth="1" fill="none">
+              <animate attributeName="r" values="80;250" dur="4s" begin="2.6s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.6;0" dur="4s" begin="2.6s" repeatCount="indefinite" />
+            </circle>
+          </svg>
+        </div>
+
+        <div className="max-w-4xl mx-auto space-y-8 relative animate-fade-up">
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-ve-accent">
             Visual Echo
           </h1>
-          <p className="text-xl md:text-2xl text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            AI Image Telephone — 画像と言葉で織りなす連想ゲーム。<br />
+          <p className="text-lg md:text-xl text-ve-text-muted leading-relaxed max-w-2xl mx-auto">
+            AI Image Telephone — 画像と言葉で織りなす連想ゲーム。
+            <br />
             あなたの解釈が、新しい世界を創り出します。
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            <Link
-              href="/gallery"
-              className="px-8 py-4 bg-blue-600 text-white rounded-full text-lg font-bold hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 shadow-blue-200 shadow-md"
-            >
+            <Button href="/gallery" size="lg">
               ギャラリーを見る
-            </Link>
-            <Link
-              href="/create"
-              className="px-8 py-4 bg-white text-blue-600 border-2 border-blue-600 rounded-full text-lg font-bold hover:bg-blue-50 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 shadow-sm"
-            >
+            </Button>
+            <Button href="/create" variant="secondary" size="lg">
               新しいお題でスタート
-            </Link>
+            </Button>
           </div>
         </div>
       </section>
 
       {/* Feature Grid */}
       <section className="py-20 px-4">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
-
+        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-6">
           {/* Card 1: View */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6 text-2xl">
-              👁️
+          <Card hover className="p-8">
+            <div className="w-10 h-10 bg-ve-accent-light rounded-xl flex items-center justify-center mb-5">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M10 4C5.5 4 2 10 2 10s3.5 6 8 6 8-6 8-6-3.5-6-8-6Z" stroke="var(--ve-accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="10" cy="10" r="2.5" stroke="var(--ve-accent)" strokeWidth="1.5"/>
+              </svg>
             </div>
-            <h3 className="text-xl font-bold mb-3 text-slate-800">View</h3>
-            <p className="text-slate-600 leading-relaxed">
+            <h3 className="text-lg font-semibold text-ve-text mb-2">View</h3>
+            <p className="text-sm text-ve-text-muted leading-relaxed">
               提示された1枚の画像を見て、そこに何が描かれているか、何を感じるかを観察しましょう。
             </p>
-          </div>
+          </Card>
 
-          {/* Card 2: Input */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
-            <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-6 text-2xl">
-              ✍️
+          {/* Card 2: Describe */}
+          <Card hover className="p-8">
+            <div className="w-10 h-10 bg-ve-accent2-light rounded-xl flex items-center justify-center mb-5">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M14 3l3 3-9 9H5v-3l9-9Z" stroke="var(--ve-accent2)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </div>
-            <h3 className="text-xl font-bold mb-3 text-slate-800">Describe</h3>
-            <p className="text-slate-600 leading-relaxed">
+            <h3 className="text-lg font-semibold text-ve-text mb-2">Describe</h3>
+            <p className="text-sm text-ve-text-muted leading-relaxed">
               あなたの解釈を言葉にして入力します。正解はありません。あなたの感性が全てです。
             </p>
-          </div>
+          </Card>
 
-          {/* Card 3: Generate (Link) */}
-          <Link
-            href="/create"
-            className="group block bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100 hover:border-blue-300 hover:shadow-md transition-all relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <span className="text-8xl">✨</span>
+          {/* Card 3: Generate */}
+          <Card hover className="p-8">
+            <div className="w-10 h-10 bg-ve-accent-light rounded-xl flex items-center justify-center mb-5">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M10 2v4M10 14v4M2 10h4M14 10h4M4.93 4.93l2.83 2.83M12.24 12.24l2.83 2.83M4.93 15.07l2.83-2.83M12.24 7.76l2.83-2.83" stroke="var(--ve-accent)" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
             </div>
-            <div className="relative z-10">
-              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6 text-2xl shadow-sm group-hover:scale-110 transition-transform">
-                🤖
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-blue-900 group-hover:text-blue-700 transition-colors">Generate</h3>
-              <p className="text-blue-800/80 leading-relaxed">
-                AIがあなたの言葉から新しい画像を生成します。
-                <span className="block mt-2 font-semibold text-blue-600 group-hover:translate-x-1 transition-transform">
-                  今すぐ始める →
-                </span>
-              </p>
-            </div>
-          </Link>
-
+            <h3 className="text-lg font-semibold text-ve-text mb-2">Generate</h3>
+            <p className="text-sm text-ve-text-muted leading-relaxed">
+              AIがあなたの言葉から新しい画像を生成します。解釈の連鎖が広がっていきます。
+            </p>
+          </Card>
         </div>
       </section>
 
-      {/* Footer / Connection Test */}
-      <footer className="py-12 text-center text-slate-400 text-sm">
-        <p>© Visual Echo Project</p>
-        <div className="mt-4">
-          <Link href="/test" className="hover:text-slate-600 transition-colors">
-            System Status Check
-          </Link>
-        </div>
+      {/* Footer */}
+      <footer className="py-12 text-center text-ve-text-subtle text-xs">
+        <p>&copy; Visual Echo Project</p>
       </footer>
-    </main>
+    </div>
   );
 }

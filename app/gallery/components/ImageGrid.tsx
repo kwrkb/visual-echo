@@ -1,5 +1,5 @@
-import type { Generation } from '@/types/database';
-import { ImageCard } from './ImageCard';
+import type { Generation } from "@/types/database";
+import { ImageCard } from "./ImageCard";
 
 interface ImageGridProps {
   generations: Generation[];
@@ -8,9 +8,9 @@ interface ImageGridProps {
 export function ImageGrid({ generations }: ImageGridProps) {
   if (generations.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-700 text-lg">まだ画像がありません</p>
-        <p className="text-gray-900 text-sm mt-2">
+      <div className="text-center py-16">
+        <p className="text-ve-text-muted text-lg">まだ画像がありません</p>
+        <p className="text-ve-text-subtle text-sm mt-2">
           最初の画像を生成して、イマジネーションの樹形図を始めましょう！
         </p>
       </div>
