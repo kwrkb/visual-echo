@@ -3,11 +3,10 @@
 # PreToolUse hook: git commit 前に npm run lint を自動実行する
 # git commit を含む Bash コマンドのみを対象とする
 
-INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+COMMAND=$(jq -r '.tool_input.command // empty')
 
-# git commit で始まるコマンドのみを対象とする
-if [[ ! "$COMMAND" =~ ^git\ commit ]]; then
+# git commit を含むコマンドを対象とする（cd && git commit 等にも対応）
+if [[ ! "$COMMAND" =~ git\ commit ]]; then
   exit 0
 fi
 
@@ -16,10 +15,7 @@ if [[ -z "$CLAUDE_PROJECT_DIR" ]] || ! cd "$CLAUDE_PROJECT_DIR"; then
   echo "Error: CLAUDE_PROJECT_DIR が未設定または移動できません" >&2
   exit 1
 fi
-LINT_OUTPUT=$(npm run lint 2>&1)
-EXIT_CODE=$?
-
-if [ $EXIT_CODE -ne 0 ]; then
+if ! LINT_OUTPUT=$(npm run lint 2>&1); then
   echo "$LINT_OUTPUT" >&2
   cat <<HOOK_JSON
 {
