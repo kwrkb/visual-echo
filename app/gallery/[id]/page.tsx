@@ -7,6 +7,7 @@ import { ImageLineage } from "./components/ImageLineage";
 import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { statusVariant } from "@/lib/ui/status";
 import type { Generation } from "@/types/database";
 
 interface PageProps {
@@ -63,12 +64,7 @@ export default async function GenerationDetailPage({ params }: PageProps) {
     .eq("status", "completed")
     .order("created_at", { ascending: false });
 
-  const statusVariant =
-    generation.status === "completed"
-      ? "success"
-      : generation.status === "pending"
-        ? "warning"
-        : "error";
+  const variant = statusVariant(generation.status);
 
   return (
     <div className="min-h-screen bg-ve-bg">
@@ -109,7 +105,7 @@ export default async function GenerationDetailPage({ params }: PageProps) {
 
             {/* Metadata */}
             <div className="flex items-center gap-3 flex-wrap">
-              <Badge variant={statusVariant}>{generation.status}</Badge>
+              <Badge variant={variant}>{generation.status}</Badge>
               <span className="text-xs text-ve-text-subtle">
                 {new Date(generation.created_at).toLocaleDateString("ja-JP", {
                   year: "numeric",

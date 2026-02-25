@@ -13,7 +13,7 @@ export default async function TreePage() {
   const treeData = await fetchTreeDataServer(null);
 
   return (
-    <div className="h-screen w-screen overflow-hidden flex flex-col">
+    <div className="h-[calc(100dvh-3.5rem)] w-screen overflow-hidden flex flex-col">
       <header
         className="flex-none h-14 px-4 sm:px-6 bg-ve-surface/80 backdrop-blur-md border-b border-ve-border/60 z-10 flex justify-between items-center"
         aria-label="ツリーページヘッダー"

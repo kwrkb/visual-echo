@@ -3,18 +3,14 @@
 import Image from "next/image";
 import { TreeNode } from "@/types/database";
 import Link from "next/link";
+import { statusBorderClass } from "@/lib/ui/status";
 
 interface TreeNodeProps {
   node: TreeNode;
 }
 
 export default function TreeNodeComponent({ node }: TreeNodeProps) {
-  const statusColor =
-    node.status === "completed"
-      ? "border-ve-success/50"
-      : node.status === "failed"
-        ? "border-ve-error/50"
-        : "border-ve-warning/50";
+  const statusColor = statusBorderClass(node.status);
 
   return (
     <Link
