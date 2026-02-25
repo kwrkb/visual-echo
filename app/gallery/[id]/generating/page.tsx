@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
@@ -17,6 +17,7 @@ const steps = [
 ] as const;
 
 export default function GeneratingPage({ params }: PageProps) {
+  const { id: generationId } = use(params);
   const router = useRouter();
   const [status, setStatus] = useState<"pending" | "completed" | "failed">(
     "pending"
@@ -33,43 +34,38 @@ export default function GeneratingPage({ params }: PageProps) {
   }, [status]);
 
   useEffect(() => {
-    params.then(({ id: generationId }) => {
-      const supabase = createClient();
-      // eslint-disable-next-line prefer-const
-      let pollInterval: NodeJS.Timeout;
+    const supabase = createClient();
 
-      const checkStatus = async () => {
-        const { data, error } = await supabase
-          .from("generations")
-          .select("status")
-          .eq("id", generationId)
-          .single();
+    const checkStatus = async () => {
+      const { data, error } = await supabase
+        .from("generations")
+        .select("status")
+        .eq("id", generationId)
+        .single();
 
-        if (error) {
-          console.error("Status check error:", error);
-          return;
-        }
+      if (error) {
+        console.error("Status check error:", error);
+        return;
+      }
 
-        if (data.status === "completed") {
-          setStatus("completed");
-          clearInterval(pollInterval);
-          setTimeout(() => {
-            router.push(`/gallery/${generationId}/result`);
-          }, 1500);
-        } else if (data.status === "failed") {
-          setStatus("failed");
-          clearInterval(pollInterval);
-        }
-      };
+      if (data.status === "completed") {
+        setStatus("completed");
+        clearInterval(pollInterval);
+        setTimeout(() => {
+          router.push(`/gallery/${generationId}/result`);
+        }, 1500);
+      } else if (data.status === "failed") {
+        setStatus("failed");
+        clearInterval(pollInterval);
+      }
+    };
 
-      checkStatus();
-      pollInterval = setInterval(checkStatus, 2000);
+    // pollInterval を先に宣言してから初回チェックを実行（TDZ回避）
+    const pollInterval = setInterval(checkStatus, 2000);
+    checkStatus();
 
-      return () => {
-        if (pollInterval) clearInterval(pollInterval);
-      };
-    });
-  }, [params, router]);
+    return () => clearInterval(pollInterval);
+  }, [generationId, router]);
 
   return (
     <div className="min-h-screen bg-ve-bg flex items-center justify-center">

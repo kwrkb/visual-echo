@@ -8,3 +8,4 @@ git履歴の分析から抽出した再発防止ルール。
 4. **`any` 型禁止**: `SupabaseClient<Database>` 等の適切な型を使う。型が不明な場合は `unknown` を使い、型ガードで絞り込む
 5. **外部サービスの設定値は初回から環境変数で管理**: モデル名・APIエンドポイント等をハードコードせず、`.env.local`、`.env.local.example`、`CLAUDE.md` の Environment Setup に記載する
 6. **Server/Client間の重複ロジックは共通関数に抽出**: フィルタ条件やクエリビルダーを `lib/` 配下の共通モジュールにまとめ、Server Components と Client Components の両方から参照する
+7. **`next/image` の `remotePatterns` はホスト名を明示的に限定**: ワイルドカード (`hostname: "**"`) は禁止。許可する外部ホストを個別に列挙し、不要になったら削除する。画像をローカル保存に移行した場合でも、既存DBレコードとの互換性を確認してから削除すること

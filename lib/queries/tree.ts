@@ -1,6 +1,8 @@
 
+import { SupabaseClient } from "@supabase/supabase-js";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
+import type { Database } from "@/types/database";
 import { TreeNode, TreeGeneration } from "@/types/database";
 
 /**
@@ -33,12 +35,12 @@ export function buildTreeFromFlatData(generations: TreeGeneration[]): TreeNode[]
 }
 
 /**
- * サーバーサイドでツリーデータを取得する (Server Components用)
+ * Supabaseクライアントを使ってツリーデータを取得する共通関数
  */
-export async function fetchTreeDataServer(rootId?: string | null): Promise<TreeNode[]> {
-    const supabase = await createServerClient();
-
-    // RPCを呼び出し
+async function fetchTreeData(
+    supabase: SupabaseClient<Database>,
+    rootId?: string | null
+): Promise<TreeNode[]> {
     const { data, error } = await supabase.rpc("get_tree_structure", {
         root_id: rootId || null
     });
@@ -55,22 +57,17 @@ export async function fetchTreeDataServer(rootId?: string | null): Promise<TreeN
 }
 
 /**
+ * サーバーサイドでツリーデータを取得する (Server Components用)
+ */
+export async function fetchTreeDataServer(rootId?: string | null): Promise<TreeNode[]> {
+    const supabase = await createServerClient();
+    return fetchTreeData(supabase, rootId);
+}
+
+/**
  * クライアントサイドでツリーデータを取得する (Client Components用)
  */
 export async function fetchTreeDataClient(rootId?: string | null): Promise<TreeNode[]> {
     const supabase = createBrowserClient();
-
-    const { data, error } = await supabase.rpc("get_tree_structure", {
-        root_id: rootId || null
-    });
-
-    if (error) {
-        console.error("Error fetching tree data:", error);
-        return [];
-    }
-
-    // 完了していないノード（pending/failed）を除外
-    const filteredData = (data || []).filter(node => node.status === 'completed');
-
-    return buildTreeFromFlatData(filteredData);
+    return fetchTreeData(supabase, rootId);
 }

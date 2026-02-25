@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { after } from 'next/server';
 import type { GenerationInsert } from '@/types/database';
 import { generateImage } from '@/lib/gemini/client';
 
@@ -54,7 +55,7 @@ export async function createGeneration(
       parent_id: parentId,
       prompt: prompt.trim(),
       status: 'pending',
-      image_url: 'https://via.placeholder.com/512', // 仮URL（後で生成画像に置き換え）
+      image_url: '/images/placeholder.svg', // 仮URL（後で生成画像に置き換え）
     };
 
     const { data, error } = await supabase
@@ -74,11 +75,10 @@ export async function createGeneration(
     // ギャラリーページのキャッシュを無効化
     revalidatePath('/gallery');
 
-    // バックグラウンドで画像生成を実行（非同期）
-    // await しないことで、ユーザーをすぐに生成中ページにリダイレクト可能
-    generateImageInBackground(data.id, prompt.trim()).catch((error) => {
-      console.error('Background image generation failed:', error);
-    });
+    // after() でレスポンス返却後にバックグラウンド画像生成を実行
+    // サーバーレス環境でもランタイムが処理完了まで維持される
+    // generateImageInBackground は内部でエラーを捕捉しDBを更新するため、外側のcatchは不要
+    after(() => generateImageInBackground(data.id, prompt.trim()));
 
     return {
       data: { id: data.id },
