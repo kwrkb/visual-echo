@@ -4,7 +4,7 @@
  */
 
 import { GoogleGenAI } from "@google/genai";
-import * as fs from "fs";
+import * as fs from "fs/promises";
 import * as path from "path";
 
 if (!process.env.GEMINI_API_KEY) {
@@ -57,16 +57,14 @@ export async function generateImage(prompt: string): Promise<string> {
 
         // 画像を保存するディレクトリ
         const publicDir = path.join(process.cwd(), "public", "images", "generated");
-        if (!fs.existsSync(publicDir)) {
-          fs.mkdirSync(publicDir, { recursive: true });
-        }
+        await fs.mkdir(publicDir, { recursive: true });
 
         // ファイル名を生成（タイムスタンプ + ランダム文字列）
         const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.png`;
         const filepath = path.join(publicDir, filename);
 
         // 画像を保存
-        fs.writeFileSync(filepath, buffer);
+        await fs.writeFile(filepath, buffer);
 
         console.log("Image generated successfully:", filename);
 
@@ -76,16 +74,16 @@ export async function generateImage(prompt: string): Promise<string> {
     }
 
     throw new Error("No image data found in response");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error generating image:", error);
 
     // APIクォータエラーの場合、分かりやすいメッセージを表示
-    if (error?.status === 429) {
+    if (error instanceof Error && "status" in error && (error as { status: number }).status === 429) {
       throw new Error("API クォータ制限に達しました。しばらく待ってから再試行してください。");
     }
 
     // その他のエラー
-    throw new Error(`画像生成エラー: ${error?.message || "不明なエラー"}`);
+    const message = error instanceof Error ? error.message : "不明なエラー";
+    throw new Error(`画像生成エラー: ${message}`);
   }
 }

@@ -25,17 +25,17 @@ async function getLineage(
   let currentId: string | null = generationId;
 
   while (currentId) {
-    const response = (await supabase
+    const result = await supabase
       .from("generations")
       .select("*")
       .eq("id", currentId)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .single()) as { data: Generation | null; error: any };
+      .single();
 
-    if (response.error || !response.data) break;
+    if (result.error || !result.data) break;
 
-    lineage.unshift(response.data);
-    currentId = response.data.parent_id;
+    const row: Generation = result.data;
+    lineage.unshift(row);
+    currentId = row.parent_id;
   }
 
   return lineage;

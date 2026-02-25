@@ -10,6 +10,10 @@ export default function AddSamplePage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  if (process.env.NODE_ENV === 'production') {
+    return null;
+  }
+
   const sampleImages = [
     {
       prompt: '時を超えた幻想的な風景。崩れゆく古代の神殿、滝、時計の歯車、楽器が織りなすシュルレアリスムの世界',
