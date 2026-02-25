@@ -42,3 +42,6 @@ next-env.d.ts
 
 # generated images (local storage)
 /public/images/generated/
+
+# review status
+/status/
