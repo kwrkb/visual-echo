@@ -1,65 +1,84 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import type { Generation } from '@/types/database';
+import Image from "next/image";
+import Link from "next/link";
+import type { Generation } from "@/types/database";
 
 interface ImageLineageProps {
   lineage: Generation[];
+  currentId?: string;
 }
 
-export function ImageLineage({ lineage }: ImageLineageProps) {
+export function ImageLineage({ lineage, currentId }: ImageLineageProps) {
   if (lineage.length === 0) {
     return null;
   }
 
+  const lastId = currentId ?? lineage[lineage.length - 1]?.id;
+
   return (
     <div className="mb-12">
-      <h2 className="text-2xl font-bold mb-6 text-gray-900">
-        この画像に至る系譜（{lineage.length}世代）
+      <h2 className="text-xl font-semibold text-ve-text mb-4">
+        系譜（{lineage.length}世代）
       </h2>
 
-      <div className="relative">
-        {/* 縦線 */}
-        <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300" />
-
-        <div className="space-y-6">
-          {lineage.map((gen, index) => (
-            <div key={gen.id} className="relative flex items-start gap-6">
-              {/* 世代番号 */}
-              <div className="relative z-10 flex-shrink-0 w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-lg">
-                {index + 1}
-              </div>
-
-              {/* 画像カード */}
-              <Link
-                href={`/gallery/${gen.id}`}
-                className="flex-1 group bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
-              >
-                <div className="flex gap-4 p-4">
-                  <div className="relative w-32 h-32 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+      {/* Horizontal film strip */}
+      <div className="overflow-x-auto pb-2">
+        <div className="flex items-center gap-2 min-w-min">
+          {lineage.map((gen, index) => {
+            const isCurrent = gen.id === lastId;
+            return (
+              <div key={gen.id} className="flex items-center">
+                <Link
+                  href={`/gallery/${gen.id}`}
+                  className={`relative shrink-0 block rounded-xl overflow-hidden transition-all duration-200 hover:scale-105 ${
+                    isCurrent
+                      ? "ring-2 ring-ve-accent ring-offset-2"
+                      : "ring-1 ring-ve-border hover:ring-ve-border-hover"
+                  }`}
+                  aria-label={`世代 ${index + 1}: ${gen.prompt}`}
+                >
+                  <div className="relative w-16 h-16 bg-ve-bg-muted">
                     <Image
                       src={gen.image_url}
                       alt={gen.prompt}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-200"
-                      sizes="128px"
+                      className="object-cover"
+                      sizes="64px"
                     />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900 line-clamp-3 mb-2">
-                      {gen.prompt}
-                    </p>
-                    <p className="text-xs text-gray-700">
-                      {new Date(gen.created_at).toLocaleDateString('ja-JP', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          ))}
+                  {/* Generation badge */}
+                  <span
+                    className={`absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-[10px] font-bold rounded-full ${
+                      isCurrent
+                        ? "bg-ve-accent text-white"
+                        : "bg-ve-bg-muted text-ve-text-muted"
+                    }`}
+                  >
+                    {index + 1}
+                  </span>
+                </Link>
+
+                {/* Connector arrow */}
+                {index < lineage.length - 1 && (
+                  <svg
+                    width="20"
+                    height="12"
+                    viewBox="0 0 20 12"
+                    fill="none"
+                    className="shrink-0 mx-1 text-ve-border"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M0 6H16M16 6L12 2M16 6L12 10"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
