@@ -60,8 +60,9 @@ export default function GeneratingPage({ params }: PageProps) {
       }
     };
 
-    checkStatus();
+    // pollInterval を先に宣言してから初回チェックを実行（TDZ回避）
     const pollInterval = setInterval(checkStatus, 2000);
+    checkStatus();
 
     return () => clearInterval(pollInterval);
   }, [generationId, router]);

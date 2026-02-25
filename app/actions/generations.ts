@@ -77,13 +77,8 @@ export async function createGeneration(
 
     // after() でレスポンス返却後にバックグラウンド画像生成を実行
     // サーバーレス環境でもランタイムが処理完了まで維持される
-    after(async () => {
-      try {
-        await generateImageInBackground(data.id, prompt.trim());
-      } catch (error) {
-        console.error('Background image generation failed:', error);
-      }
-    });
+    // generateImageInBackground は内部でエラーを捕捉しDBを更新するため、外側のcatchは不要
+    after(() => generateImageInBackground(data.id, prompt.trim()));
 
     return {
       data: { id: data.id },
