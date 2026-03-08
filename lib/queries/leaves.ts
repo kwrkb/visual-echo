@@ -3,34 +3,19 @@ import type { Database, Generation } from '@/types/database';
 
 /**
  * リーフノード（子を持たない完了済み世代）を取得する
- *
- * 2段階クエリ:
- * 1. 子として参照されている parent_id を全て取得
- * 2. その中に含まれない完了済み世代がリーフ
+ * DB側の NOT EXISTS サブクエリで効率的にフィルタリング
  */
 export async function getLeafNodes(
   supabase: SupabaseClient<Database>
 ): Promise<Generation[]> {
-  // 完了済みの子を持つノードのIDセットを構築
-  // pending/failed の子は無視（失敗した子がいても親はリーフとして扱う）
-  const { data: childRows } = await supabase
-    .from('generations')
-    .select('parent_id')
-    .not('parent_id', 'is', null)
-    .eq('status', 'completed');
+  const { data, error } = await supabase.rpc('get_leaf_nodes');
 
-  const parentIdSet = new Set(
-    childRows?.map((r) => r.parent_id).filter(Boolean) || []
-  );
+  if (error) {
+    console.error('Failed to get leaf nodes:', error);
+    return [];
+  }
 
-  // 完了済み世代を取得
-  const { data: completed } = await supabase
-    .from('generations')
-    .select('*')
-    .eq('status', 'completed');
-
-  // リーフノード = 子を持たない世代
-  return completed?.filter((g) => !parentIdSet.has(g.id)) || [];
+  return (data as Generation[]) || [];
 }
 
 /**

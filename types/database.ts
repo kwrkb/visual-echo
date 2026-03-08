@@ -56,6 +56,30 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
+      get_leaf_nodes: {
+        Args: Record<string, never>;
+        Returns: {
+          id: string;
+          parent_id: string | null;
+          image_url: string;
+          prompt: string;
+          created_at: string;
+          status: Database["public"]["Enums"]["generation_status"];
+        }[];
+      };
+      get_lineage: {
+        Args: {
+          generation_id: string;
+        };
+        Returns: {
+          id: string;
+          parent_id: string | null;
+          image_url: string;
+          prompt: string;
+          created_at: string;
+          status: Database["public"]["Enums"]["generation_status"];
+        }[];
+      };
       get_tree_structure: {
         Args: {
           root_id?: string | null;

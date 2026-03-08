@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation';
 import { createGeneration } from '@/app/actions/generations';
 import { Button } from '@/components/ui/Button';
 
+const PROMPT_MAX_LENGTH = 1000;
+const ERROR_THRESHOLD = 950;
+const WARNING_THRESHOLD = 900;
+
 interface BlindPromptFormProps {
   parentId: string;
 }
@@ -36,9 +40,9 @@ export function BlindPromptForm({ parentId }: BlindPromptFormProps) {
 
   const charCount = prompt.length;
   const charColor =
-    charCount > 950
+    charCount > ERROR_THRESHOLD
       ? 'text-ve-error'
-      : charCount > 900
+      : charCount > WARNING_THRESHOLD
         ? 'text-ve-warning'
         : 'text-ve-text-subtle';
 
@@ -67,14 +71,14 @@ export function BlindPromptForm({ parentId }: BlindPromptFormProps) {
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           rows={4}
-          maxLength={1000}
+          maxLength={PROMPT_MAX_LENGTH}
           className="w-full px-4 py-3 border border-ve-border rounded-xl bg-ve-surface text-ve-text placeholder:text-ve-text-subtle resize-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ve-accent/30 focus:border-ve-accent"
           placeholder="例: 暗い森の中に光る小さな扉がある..."
           disabled={loading}
           autoFocus
         />
         <p className={`text-xs mt-1.5 text-right ${charColor}`}>
-          {charCount} / 1000
+          {charCount} / {PROMPT_MAX_LENGTH}
         </p>
       </div>
 
