@@ -10,8 +10,8 @@ vi.mock("next/server", () => ({
 }));
 
 // Supabase サーバークライアントのモック
-const mockSelect = vi.fn();
 const mockSingle = vi.fn();
+const mockSelect = vi.fn();
 const mockInsert = vi.fn();
 const mockFrom = vi.fn();
 
@@ -29,17 +29,35 @@ vi.mock("@/lib/gemini/client", () => ({
 // 動的 import で 'use server' ファイルを読み込む
 const { createGeneration } = await import("./generations");
 
-function setupInsertMock(result: { data: unknown; error: unknown }) {
+/** 親の存在確認が成功するモックを設定 */
+function setupParentExistsMock() {
+  return vi.fn().mockReturnValue({
+    eq: vi.fn().mockReturnValue({
+      single: vi.fn().mockResolvedValue({ data: { id: "parent-1" }, error: null }),
+    }),
+  });
+}
+
+/** insert → select('id') → single のチェーンモックを設定 */
+function setupInsertChainMock(result: { data: unknown; error: unknown }) {
   mockSingle.mockResolvedValue(result);
   mockSelect.mockReturnValue({ single: mockSingle });
   mockInsert.mockReturnValue({ select: mockSelect });
+}
+
+/** 全操作（親確認・挿入・更新）をまとめてモック設定 */
+function setupMocksForCreation(
+  insertResult: { data: unknown; error: unknown },
+  options: { parentExists?: boolean } = {}
+) {
+  setupInsertChainMock(insertResult);
+  const parentSelectMock = options.parentExists !== false
+    ? setupParentExistsMock()
+    : vi.fn();
+
   mockFrom.mockReturnValue({
     insert: mockInsert,
-    select: vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        single: vi.fn().mockResolvedValue({ data: { id: "parent-1" }, error: null }),
-      }),
-    }),
+    select: parentSelectMock,
     update: vi.fn().mockReturnValue({
       eq: vi.fn().mockResolvedValue({ error: null }),
     }),
@@ -61,14 +79,11 @@ describe("createGeneration", () => {
     vi.clearAllMocks();
   });
 
-  it("空プロンプトでエラーを返す", async () => {
-    const result = await createGeneration(null, "");
-    expect(result.error).toBe("プロンプトを入力してください");
-    expect(result.data).toBeNull();
-  });
-
-  it("空白のみのプロンプトでエラーを返す", async () => {
-    const result = await createGeneration(null, "   ");
+  it.each([
+    { name: "空プロンプト", prompt: "" },
+    { name: "空白のみのプロンプト", prompt: "   " },
+  ])("$nameでエラーを返す", async ({ prompt }) => {
+    const result = await createGeneration(null, prompt);
     expect(result.error).toBe("プロンプトを入力してください");
     expect(result.data).toBeNull();
   });
@@ -87,10 +102,20 @@ describe("createGeneration", () => {
     expect(result.data).toBeNull();
   });
 
-  it("正常系: 生成レコードを作成して ID を返す", async () => {
-    setupInsertMock({ data: { id: "new-gen-1" }, error: null });
+  it("正常系（親なし）: 生成レコードを作成して ID を返す", async () => {
+    setupMocksForCreation({ data: { id: "new-gen-1" }, error: null });
     const result = await createGeneration(null, "a beautiful sunset");
     expect(result.data).toEqual({ id: "new-gen-1" });
+    expect(result.error).toBeNull();
+  });
+
+  it("正常系（親あり）: 親の存在確認後に生成レコードを作成する", async () => {
+    setupMocksForCreation(
+      { data: { id: "child-gen-1" }, error: null },
+      { parentExists: true }
+    );
+    const result = await createGeneration("parent-1", "a child image");
+    expect(result.data).toEqual({ id: "child-gen-1" });
     expect(result.error).toBeNull();
   });
 });
