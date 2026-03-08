@@ -35,11 +35,11 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            <Button href="/gallery" size="lg">
-              ギャラリーを見る
+            <Button href="/play" size="lg">
+              参加する
             </Button>
-            <Button href="/create" variant="secondary" size="lg">
-              新しいお題でスタート
+            <Button href="/gallery" variant="secondary" size="lg">
+              観察する
             </Button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
@@ -19,6 +19,8 @@ const steps = [
 export default function GeneratingPage({ params }: PageProps) {
   const { id: generationId } = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const fromPlay = searchParams.get("from") === "play";
   const [status, setStatus] = useState<"pending" | "completed" | "failed">(
     "pending"
   );
@@ -51,8 +53,11 @@ export default function GeneratingPage({ params }: PageProps) {
       if (data.status === "completed") {
         setStatus("completed");
         clearInterval(pollInterval);
+        const resultUrl = fromPlay
+          ? `/gallery/${generationId}/result?from=play`
+          : `/gallery/${generationId}/result`;
         setTimeout(() => {
-          router.push(`/gallery/${generationId}/result`);
+          router.push(resultUrl);
         }, 1500);
       } else if (data.status === "failed") {
         setStatus("failed");
@@ -65,7 +70,7 @@ export default function GeneratingPage({ params }: PageProps) {
     checkStatus();
 
     return () => clearInterval(pollInterval);
-  }, [generationId, router]);
+  }, [generationId, router, fromPlay]);
 
   return (
     <div className="min-h-screen bg-ve-bg flex items-center justify-center">
