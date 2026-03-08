@@ -82,7 +82,7 @@ sequenceDiagram
 
 ### 前提条件
 
-- Node.js 18以上
+- Node.js 20以上
 - Supabaseアカウント
 - Google Gemini APIキー
 
@@ -332,7 +332,7 @@ sequenceDiagram
 
 ### Prerequisites
 
-- Node.js 18 or higher
+- Node.js 20 or higher
 - Supabase Account
 - Google Gemini API Key
 

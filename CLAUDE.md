@@ -87,7 +87,13 @@ npm run build        # Build for production
 npm start            # Start production server
 
 # Code quality
-npm run lint         # Run ESLint
+npm run lint         # Run ESLint (pre-commit hookで自動実行)
+
+# Testing
+npm test             # Run all tests (vitest run)
+npm run test:watch   # Watch mode (vitest)
+npx vitest run lib/queries/tree.test.ts          # 単一ファイル実行
+npx vitest run -t "空配列"                        # テスト名でフィルタ
 ```
 
 ## Environment Setup
@@ -166,6 +172,33 @@ const { data: roots } = await supabase
 
 For deep tree traversal, consider using Postgres recursive CTEs via `.rpc()` for performance.
 
+### Query Layer: RPC Wrappers (`lib/queries/`)
+
+DB クエリロジックは `lib/queries/` に集約。Supabase JS クライアントで表現できない複雑なクエリは PostgreSQL RPC 関数で実装:
+
+- `lib/queries/tree.ts` — ツリー構造取得 (`get_tree_structure` RPC) + `buildTreeFromFlatData` 純粋関数
+- `lib/queries/leaves.ts` — リーフノード取得 (`get_leaf_nodes` RPC, `NOT EXISTS` サブクエリ)
+- `lib/queries/lineage.ts` — 系譜取得 (`get_lineage` RPC, 再帰CTE)
+
+RPC ラッパーは `SupabaseClient<Database>` を引数に取り、Server/Client どちらからも使える設計。
+
+### Testing Infrastructure
+
+**Vitest** を使用。設定は `vitest.config.ts`（`@` エイリアス解決のみ）。
+
+テスト構成:
+- **純粋関数テスト**: `lib/ui/status.test.ts`, `lib/queries/tree.test.ts` — モック不要
+- **RPC ラッパーテスト**: `lib/queries/leaves.test.ts`, `lib/queries/lineage.test.ts` — `createMockSupabase()` でモック
+- **Server Action テスト**: `app/actions/generations.test.ts` — `vi.mock` で外部依存をモック
+
+**Supabase モックパターン** (`lib/test-helpers.ts`):
+```typescript
+import { createMockSupabase } from '@/lib/test-helpers';
+const supabase = createMockSupabase({
+  get_leaf_nodes: { data: [...], error: null },
+});
+```
+
 ## Key Technical Constraints
 
 - **Next.js 15**: Uses App Router exclusively (no Pages Router)
@@ -194,24 +227,8 @@ The intended game loop is:
 
 ## Implemented Features
 
-### Gallery Display
-- Main gallery (`/gallery`) shows 3 random completed images
-- "全て表示" button links to `/gallery/all` showing all images
-- Random selection refreshes on each page load for discovery
-- All images page (`/gallery/all`) displays chronological list
-
-### Image Detail & Generation Flow
-- Detail page shows image, original prompt, and metadata
-- Users can input new prompts to generate child images
-- **Image Lineage**: Visual timeline showing the full ancestry from root to current image
-  - Displays generation number badges with connecting vertical line
-  - Each ancestor is clickable to navigate through the tree
-- Child images are displayed in a grid below the parent
-- Generation status page polls database every 2 seconds
-- Result page shows before/after transformation when parent exists
-
-### UI Styling
-- Dark text colors for readability (text-gray-900 for main text, text-gray-700 for subtitles)
-- Responsive grid layouts with hover effects
-- Image cards with aspect-ratio preservation
-- Smooth transitions and animations
+- **Gallery** (`/gallery`, `/gallery/all`): ランダム3枚表示 + 全件一覧
+- **Image Detail** (`/gallery/[id]`): 画像詳細、系譜タイムライン、子画像グリッド、プロンプト入力
+- **Play Mode** (`/play/[id]`): ブラインドモード（親画像を見ずにプロンプト入力）
+- **Generation Flow**: pending → generating ページ（2秒ポーリング） → result ページ
+- **Tree View** (`/tree`): ツリー構造の可視化

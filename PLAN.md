@@ -67,6 +67,25 @@ VISIONは「遊ぶ体験」と「眺める体験」の両方を重視。Phase 1-
 
 ---
 
+## テスト基盤導入 ✅ 完了
+
+### Why
+プロジェクトにテストが一切なく、レビュー指摘でクエリロジックを書き換えた際も手動確認のみだった。
+純粋関数とサーバーアクションのバリデーションにユニットテストを入れ、リグレッションを防ぐ。
+
+### 実装内容
+- [x] Vitest 導入 (`vitest.config.ts`, `package.json` にスクリプト追加)
+- [x] 純粋関数テスト (`lib/ui/status.test.ts`, `lib/queries/tree.test.ts`)
+- [x] Supabase モックヘルパー (`lib/test-helpers.ts`)
+- [x] RPC ラッパーテスト (`lib/queries/leaves.test.ts`, `lib/queries/lineage.test.ts`)
+- [x] Server Action テスト (`app/actions/generations.test.ts`)
+
+### 結果
+- 5 テストファイル / 24 テストケース / 全パス
+- lint エラーなし
+
+---
+
 ## 依存関係
 
 ```
@@ -80,4 +99,5 @@ Phase 3 (観察体験) ← スキーマ変更 (contributor_id)、Phase 1-2前提
 ## 検証（全Phase共通）
 - `npm run lint` パス
 - `npm run build` 成功
+- `npm test` パス
 - 手動テストで完了条件を確認
