@@ -55,6 +55,44 @@ CREATE POLICY "Enable update access for all users" ON generations
 CREATE POLICY "Enable delete access for all users" ON generations
   FOR DELETE USING (true);
 
+-- リーフノード取得関数（子を持たない完了済み世代）
+-- クライアント側での全件フェッチを避け、DB側でフィルタリング
+CREATE OR REPLACE FUNCTION get_leaf_nodes()
+RETURNS SETOF generations
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT g.*
+  FROM generations g
+  WHERE g.status = 'completed'
+    AND NOT EXISTS (
+      SELECT 1 FROM generations c
+      WHERE c.parent_id = g.id
+        AND c.status = 'completed'
+    );
+$$;
+
+-- 系譜取得関数（指定世代からルートまでの系譜を一括取得）
+-- N+1クエリを回避する再帰CTE
+CREATE OR REPLACE FUNCTION get_lineage(generation_id UUID)
+RETURNS SETOF generations
+LANGUAGE sql
+STABLE
+AS $$
+  WITH RECURSIVE lineage AS (
+    SELECT g.*, 0 AS depth
+    FROM generations g
+    WHERE g.id = generation_id
+    UNION ALL
+    SELECT p.*, l.depth + 1
+    FROM generations p
+    INNER JOIN lineage l ON l.parent_id = p.id
+  )
+  SELECT id, parent_id, image_url, prompt, created_at, status
+  FROM lineage
+  ORDER BY depth DESC;
+$$;
+
 -- コメント追加（テーブルとカラムの説明）
 COMMENT ON TABLE generations IS '画像生成の履歴と連鎖を管理するテーブル';
 COMMENT ON COLUMN generations.id IS '生成レコードの一意な識別子';

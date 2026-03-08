@@ -8,37 +8,10 @@ import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { statusVariant } from "@/lib/ui/status";
-import type { Generation } from "@/types/database";
+import { getLineage } from "@/lib/queries/lineage";
 
 interface PageProps {
   params: Promise<{ id: string }>;
-}
-
-import { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/types/database";
-
-async function getLineage(
-  supabase: SupabaseClient<Database>,
-  generationId: string
-): Promise<Generation[]> {
-  const lineage: Generation[] = [];
-  let currentId: string | null = generationId;
-
-  while (currentId) {
-    const result = await supabase
-      .from("generations")
-      .select("*")
-      .eq("id", currentId)
-      .single();
-
-    if (result.error || !result.data) break;
-
-    const row: Generation = result.data;
-    lineage.unshift(row);
-    currentId = row.parent_id;
-  }
-
-  return lineage;
 }
 
 export default async function GenerationDetailPage({ params }: PageProps) {

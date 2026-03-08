@@ -3,13 +3,18 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
+import { ImageLineage } from "../components/ImageLineage";
+import { getLineage } from "@/lib/queries/lineage";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
 }
 
-export default async function ResultPage({ params }: PageProps) {
+export default async function ResultPage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const { from } = await searchParams;
+  const isFromPlay = from === "play";
   const supabase = await createClient();
 
   const { data: generation, error } = await supabase
@@ -21,6 +26,10 @@ export default async function ResultPage({ params }: PageProps) {
   if (error || !generation) {
     notFound();
   }
+
+  // 系譜を取得（リビール表示用）
+  const lineage = await getLineage(supabase, id);
+  const hasLineage = lineage.length > 1;
 
   const { data: parent } = generation.parent_id
     ? await supabase
@@ -35,10 +44,14 @@ export default async function ResultPage({ params }: PageProps) {
       <Container>
         <div className="text-center mb-10 animate-fade-up">
           <h1 className="text-3xl font-semibold tracking-tight text-ve-text mb-2">
-            新しいエコーが生まれました
+            {isFromPlay
+              ? "あなたの解釈が連鎖に加わりました"
+              : "新しいエコーが生まれました"}
           </h1>
           <p className="text-sm text-ve-text-muted">
-            あなたの説明から、AIが新しい画像を生成しました
+            {isFromPlay
+              ? "あなたの言葉がどのように変換されたか、見てみましょう"
+              : "あなたの説明から、AIが新しい画像を生成しました"}
           </p>
         </div>
 
@@ -110,18 +123,48 @@ export default async function ResultPage({ params }: PageProps) {
           </div>
         )}
 
+        {/* 系譜リビール（2世代以上ある場合） */}
+        {hasLineage && (
+          <div
+            className="mb-12 animate-fade-up"
+            style={{ animationDelay: "0.2s" }}
+          >
+            <div className="text-center mb-4">
+              <p className="text-sm text-ve-text-muted">
+                {isFromPlay
+                  ? "この画像がたどってきた連鎖の全体像です"
+                  : "ここまでの系譜"}
+              </p>
+            </div>
+            <ImageLineage lineage={lineage} currentId={id} />
+          </div>
+        )}
+
         <div
           className="flex flex-col sm:flex-row gap-3 justify-center animate-fade-up"
-          style={{ animationDelay: "0.2s" }}
+          style={{ animationDelay: hasLineage ? "0.3s" : "0.2s" }}
         >
-          <Button href={`/gallery/${generation.id}`} size="lg">
-            続けて生成する
-          </Button>
-          <Button href="/gallery" variant="secondary" size="lg">
-            ギャラリーに戻る
-          </Button>
+          {isFromPlay ? (
+            <>
+              <Button href="/play" size="lg">
+                もう一枚やってみる
+              </Button>
+              <Button href={`/gallery/${generation.id}`} variant="secondary" size="lg">
+                この画像の詳細を見る
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button href={`/gallery/${generation.id}`} size="lg">
+                続けて生成する
+              </Button>
+              <Button href="/gallery" variant="secondary" size="lg">
+                ギャラリーに戻る
+              </Button>
+            </>
+          )}
           {parent && (
-            <Button href={`/tree`} variant="ghost" size="lg">
+            <Button href="/tree" variant="ghost" size="lg">
               ツリーで見る
             </Button>
           )}
