@@ -11,11 +11,13 @@ import type { Database, Generation } from '@/types/database';
 export async function getLeafNodes(
   supabase: SupabaseClient<Database>
 ): Promise<Generation[]> {
-  // 子を持つノードのIDセットを構築
+  // 完了済みの子を持つノードのIDセットを構築
+  // pending/failed の子は無視（失敗した子がいても親はリーフとして扱う）
   const { data: childRows } = await supabase
     .from('generations')
     .select('parent_id')
-    .not('parent_id', 'is', null);
+    .not('parent_id', 'is', null)
+    .eq('status', 'completed');
 
   const parentIdSet = new Set(
     childRows?.map((r) => r.parent_id).filter(Boolean) || []

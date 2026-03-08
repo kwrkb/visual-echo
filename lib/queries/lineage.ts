@@ -22,9 +22,10 @@ export async function getLineage(
     if (result.error || !result.data) break;
 
     const row: Generation = result.data;
-    lineage.unshift(row);
+    lineage.push(row);
     currentId = row.parent_id;
   }
 
+  lineage.reverse();
   return lineage;
 }
