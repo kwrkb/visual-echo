@@ -76,7 +76,7 @@ function setupParentNotFoundMock() {
 
 describe("createGeneration", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   it.each([

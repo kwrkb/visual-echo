@@ -81,7 +81,7 @@ VISIONは「遊ぶ体験」と「眺める体験」の両方を重視。Phase 1-
 - [x] Server Action テスト (`app/actions/generations.test.ts`)
 
 ### 結果
-- 5 テストファイル / 24 テストケース / 全パス
+- 5 テストファイル / 25 テストケース / 全パス
 - lint エラーなし
 
 ---

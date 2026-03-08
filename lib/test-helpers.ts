@@ -2,10 +2,11 @@ import { vi } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 
-type RpcResults = Record<
-  string,
-  { data: unknown; error: null } | { data: null; error: { message: string } }
->;
+type RpcName = keyof Database["public"]["Functions"];
+type RpcResult =
+  | { data: unknown; error: null }
+  | { data: null; error: { message: string } };
+type RpcResults = Partial<Record<RpcName, RpcResult>>;
 
 /**
  * Supabase クライアントの軽量モック工場
@@ -15,7 +16,8 @@ export function createMockSupabase(
   rpcResults: RpcResults = {}
 ): SupabaseClient<Database> {
   const mock = {
-    rpc: vi.fn((name: string) => {
+    rpc: vi.fn((name: string, args?: Record<string, unknown>) => {
+      void args;
       if (name in rpcResults) {
         return Promise.resolve(rpcResults[name]);
       }
