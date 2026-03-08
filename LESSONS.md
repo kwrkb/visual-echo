@@ -59,3 +59,13 @@ Visual Echo 開発で得た教訓・パターンを記録する。
 - `vi.mock` は巻き上げ（hoisting）されるため、モック変数は `vi.fn()` で宣言してから `vi.mock` 内で参照する
 - `'use server'` ファイルのインポートは `await import()` を使う（トップレベル `import` だとモック適用前に実行される）
 - **パターン**: `vi.mock` → `const mockXxx = vi.fn()` → `await import()` の順序を守る
+
+### 依存ライブラリの Node.js 最低バージョンを確認する
+- Vitest v4 は Node 20+ が必須だが、README には Node 18 以上と記載していた
+- Codex レビューで指摘されるまで気づかなかった
+- **ルール**: devDependencies 追加時に `engines` 要件を確認し、`package.json` の `engines` フィールドと README を同時に更新する
+
+### Server Action テストのモックセットアップは責務分離する
+- `setupInsertMock` が親確認・挿入・更新の3操作を1関数にまとめており、どのテストがどのモックを使うか不明瞭だった
+- Gemini レビューで指摘され、`setupParentExistsMock` / `setupInsertChainMock` / `setupMocksForCreation` に分離
+- **ルール**: モックセットアップ関数は1操作1関数にし、組み合わせ用の上位関数で合成する
