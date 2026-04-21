@@ -15,8 +15,8 @@ const mockSelect = vi.fn();
 const mockInsert = vi.fn();
 const mockFrom = vi.fn();
 
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: vi.fn(async () => ({
+vi.mock("@/lib/supabase/admin", () => ({
+  createAdminClient: vi.fn(() => ({
     from: mockFrom,
   })),
 }));

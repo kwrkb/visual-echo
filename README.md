@@ -114,6 +114,9 @@ cp .env.local.example .env.local
 NEXT_PUBLIC_SUPABASE_URL=your-project-url.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
+# サーバーサイドの書き込み用（RLS をバイパス）
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
 # Google Gemini API設定（https://makersuite.google.com/app/apikey から取得）
 GEMINI_API_KEY=your-gemini-api-key
 

@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { after } from 'next/server';
 import type { GenerationInsert } from '@/types/database';
@@ -32,7 +32,7 @@ export async function createGeneration(
       };
     }
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // parent_idが指定されている場合、存在確認
     if (parentId) {
@@ -104,7 +104,7 @@ async function generateImageInBackground(generationId: string, prompt: string) {
     const imageUrl = await generateImage(prompt);
 
     // データベースを更新
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { error } = await supabase
       .from('generations')
       .update({
@@ -132,7 +132,7 @@ async function generateImageInBackground(generationId: string, prompt: string) {
 
     // エラー時はステータスを failed に更新
     try {
-      const supabase = await createClient();
+      const supabase = createAdminClient();
       await supabase
         .from('generations')
         .update({ status: 'failed' })
@@ -155,7 +155,7 @@ export async function createTestGeneration(
   error: string | null;
 }> {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const newGeneration: GenerationInsert = {
       parent_id: null,

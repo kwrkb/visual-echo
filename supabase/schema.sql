@@ -39,21 +39,17 @@ CREATE INDEX IF NOT EXISTS idx_generations_created_at ON generations(created_at 
 CREATE INDEX IF NOT EXISTS idx_generations_status ON generations(status);
 
 -- Row Level Security (RLS) を有効化
--- 本番環境では適切なポリシーを設定してください
 ALTER TABLE generations ENABLE ROW LEVEL SECURITY;
 
--- 開発用: 全員が読み書き可能なポリシー（本番では変更すること！）
+-- SELECT は公開ゲームのため全ユーザーに開放
 CREATE POLICY "Enable read access for all users" ON generations
   FOR SELECT USING (true);
 
-CREATE POLICY "Enable insert access for all users" ON generations
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Enable update access for all users" ON generations
-  FOR UPDATE USING (true);
-
-CREATE POLICY "Enable delete access for all users" ON generations
-  FOR DELETE USING (true);
+-- INSERT / UPDATE / DELETE は service_role クライアント経由のみ許可する。
+-- service_role は Supabase のデフォルトで RLS をバイパスするため明示ポリシーは不要。
+-- anon クライアントからの書き込みはポリシー不在により自動的に拒否される。
+-- アプリ側は lib/supabase/admin.ts の createAdminClient() を使うこと。
+-- 将来ユーザー認証を導入する際は auth.uid() ベースのポリシーに差し替える。
 
 -- リーフノード取得関数（子を持たない完了済み世代）
 -- クライアント側での全件フェッチを避け、DB側でフィルタリング
