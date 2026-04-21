@@ -8,6 +8,7 @@
  * Client Components にインポートされないよう注意（SERVICE_ROLE_KEY が漏洩する）。
  */
 
+import "server-only";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 
