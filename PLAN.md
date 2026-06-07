@@ -101,3 +101,35 @@ Phase 3 (観察体験) ← スキーマ変更 (contributor_id)、Phase 1-2前提
 - `npm run build` 成功
 - `npm test` パス
 - 手動テストで完了条件を確認
+
+---
+
+## 依存関係アップデート + セキュリティチェック ✅ 完了（2026-06-08）
+
+### Why
+前回実装から時間が経過し、依存関係に既知の脆弱性（critical 1件・high 2件・moderate 2件）が蓄積。
+また現行の Gemini モデル `gemini-2.5-flash-image` が 2026-10-02 シャットダウン予定。
+
+### 実装内容
+- [x] npm audit fix: next 15.1→15.5.19, vitest 4.0.18→4.1.8 (critical/high を解消)
+- [x] @supabase/ssr: 0.8.0→0.10.3, @supabase/supabase-js: 2.86.2→2.107.0
+- [x] Next.js 16.2.7 へメジャー更新
+- [x] overrides.postcss "^8.5.15" 追加（Next 同梱の postcss@8.4.31 を強制アップグレード）
+  → **npm audit 全 0 件達成**
+- [x] .eslintrc.json → eslint.config.mjs（flat config）移行 + next lint → eslint . へ変更
+- [x] engines.node: ">=20" → ">=20.9.0" (README.md と整合)
+- [x] @google/genai: 1.31.0→2.8.0 + モデルを gemini-3.1-flash-image (GA) へ移行
+- [x] lib/test-helpers.ts: rpcResults[name as RpcName] 型修正
+- [x] app/gallery/page.tsx: Math.random() → crypto.getRandomValues()（purity ルール対応）
+
+### 誤算と判断
+- postcss moderate は Next 16.x 安定版（16.3.0-canary.5 未満）でも残存。
+  `overrides` による強制アップグレードで解消（Next 15 でも可能だった）。
+- middleware.ts の proxy.ts 改名は意図的に保留（→ implementation-notes 参照）。
+- Gemini API キー閉鎖中のため画像生成の実動作テストは未実施（PR チェックリスト参照）。
+
+### 結果
+- npm audit: 0 件
+- npm test: 5 ファイル / 25 テスト / 全パス
+- npm run build: 成功（Next 16.2.7 / Turbopack）
+- npm run lint: エラー 0 件
