@@ -27,7 +27,9 @@ export default async function GalleryPage() {
     );
   }
 
-  const shuffled = [...(allGenerations || [])].sort(() => Math.random() - 0.5);
+  const shuffled = [...(allGenerations || [])].sort(
+    () => crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000 - 0.5
+  );
   const displayGenerations = shuffled.slice(0, 3);
 
   return (
