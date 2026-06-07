@@ -59,10 +59,10 @@ All database operations are type-safe via `types/database.ts`:
 
 ### Image Generation: Gemini API
 
-Image generation uses **Google Gemini 2.5 Flash Image** model via `@google/genai` SDK (`lib/gemini/client.ts`).
+Image generation uses **Google Gemini 3.1 Flash Image** model via `@google/genai` SDK (`lib/gemini/client.ts`).
 
 **Implementation details**:
-- Uses `gemini-2.5-flash-image` model for image generation
+- Uses `gemini-3.1-flash-image` model for image generation (GA, 2026-05-28 リリース)
 - High temperature (1.5) and sampling parameters for creative, diverse outputs
 - Generated images are saved locally in `public/images/generated/` directory
 - Image URLs are stored as `/images/generated/{timestamp}-{random}.png`
@@ -104,7 +104,7 @@ Required environment variables (see `.env.local.example`):
 NEXT_PUBLIC_SUPABASE_URL=         # Supabase project URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY=    # Supabase anon/public key
 GEMINI_API_KEY=                    # Google Gemini API key
-GEMINI_MODEL=gemini-2.5-flash-image  # Optional: model version
+GEMINI_MODEL=gemini-3.1-flash-image  # Optional: model version override
 ```
 
 **Database setup**: Run `supabase/schema.sql` in Supabase SQL Editor before first use.
