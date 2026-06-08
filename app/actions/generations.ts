@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { after } from 'next/server';
 import type { GenerationInsert } from '@/types/database';
-import { generateImage } from '@/lib/gemini/client';
+import { generateImage } from '@/lib/nim/client';
 
 /**
  * 新しい画像生成リクエストを作成
@@ -100,7 +100,7 @@ async function generateImageInBackground(generationId: string, prompt: string) {
   try {
     console.log(`Starting background image generation for ${generationId}`);
 
-    // Gemini APIで画像を生成
+    // NVIDIA NIM (FLUX.1-schnell) で画像を生成
     const imageUrl = await generateImage(prompt);
 
     // データベースを更新

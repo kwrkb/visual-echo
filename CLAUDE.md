@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Visual Echo** is an asynchronous, branching image association game powered by AI. Players describe an image in text, and the AI (Google Gemini) generates a new image from that description. This creates a tree structure of visual transformations, similar to Git branches.
+**Visual Echo** is an asynchronous, branching image association game powered by AI. Players describe an image in text, and the AI (NVIDIA NIM / FLUX.1-schnell) generates a new image from that description. This creates a tree structure of visual transformations, similar to Git branches.
 
 Core concept: A single image can spawn multiple interpretations, forming a "tree of imagination" where each node represents a generation cycle (image → text → new image).
 
@@ -57,23 +57,26 @@ All database operations are type-safe via `types/database.ts`:
 
 **When modifying the database schema**: Update `supabase/schema.sql` AND `types/database.ts` in sync.
 
-### Image Generation: Gemini API
+### Image Generation: NVIDIA NIM API
 
-Image generation uses **Google Gemini 3.1 Flash Image** model via `@google/genai` SDK (`lib/gemini/client.ts`).
+Image generation uses **NVIDIA NIM hosted API** with the **FLUX.1-schnell** model via Node.js standard `fetch` (`lib/nim/client.ts`).
 
 **Implementation details**:
-- Uses `gemini-3.1-flash-image` model for image generation (GA, 2026-05-28 リリース)
-- High temperature (1.5) and sampling parameters for creative, diverse outputs
+- Uses `black-forest-labs/flux.1-schnell` model (4-step distilled, fast generation, low cost)
+- Endpoint: `https://ai.api.nvidia.com/v1/genai/${NVIDIA_NIM_MODEL}`
+- Request body: `{ prompt, width: 1024, height: 1024, seed: <random>, steps: 4 }`
+- Response: `artifacts[0].base64` (NIM standard) with `data[0].b64_json` as OpenAI-compatible fallback
+- FLUX.1-schnell returns **JPEG** data; the file extension is detected from magic bytes (JPEG `FF D8` → `.jpg`, PNG `89 50` → `.png`)
 - Generated images are saved locally in `public/images/generated/` directory
-- Image URLs are stored as `/images/generated/{timestamp}-{random}.png`
+- Image URLs are stored as `/images/generated/{timestamp}-{random}.{jpg|png}`
 - Images are generated asynchronously in background via Server Actions
 - Generated images are excluded from git via `.gitignore`
 
 **Background generation flow**:
 1. Server Action creates a `pending` generation record
 2. Returns immediately with the generation ID
-3. Background function generates image via Gemini API
-4. Downloads base64 image data and saves to local filesystem
+3. Background function calls NVIDIA NIM API via `fetch`
+4. Decodes base64 image data and saves to local filesystem
 5. Updates generation record to `completed` status with image URL
 
 ## Commands
@@ -101,10 +104,11 @@ npx vitest run -t "空配列"                        # テスト名でフィル�
 Required environment variables (see `.env.local.example`):
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=         # Supabase project URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY=    # Supabase anon/public key
-GEMINI_API_KEY=                    # Google Gemini API key
-GEMINI_MODEL=gemini-3.1-flash-image  # Optional: model version override
+NEXT_PUBLIC_SUPABASE_URL=                  # Supabase project URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=      # Supabase publishable key (sb_publishable_...)
+SUPABASE_SECRET_KEY=                       # Supabase secret key (sb_secret_..., server-only)
+NVIDIA_NIM_API_KEY=               # NVIDIA NIM API key (https://build.nvidia.com)
+NVIDIA_NIM_MODEL=black-forest-labs/flux.1-schnell  # Optional: model override
 ```
 
 **Database setup**: Run `supabase/schema.sql` in Supabase SQL Editor before first use.
@@ -204,7 +208,7 @@ const supabase = createMockSupabase({
 - **Next.js 15**: Uses App Router exclusively (no Pages Router)
 - **React 19**: Uses latest React features
 - **TypeScript strict mode**: All code must be type-safe
-- **Image optimization**: next.config.ts allows remote image patterns for AI-generated images
+- **Image optimization**: next.config.ts has `remotePatterns` for legacy DB records (via.placeholder.com). AI-generated images are stored locally, so no remote pattern is needed for NIM output.
 - **RLS is enabled**: Currently permissive (all operations allowed) for development. Tighten policies before production deployment.
 
 ## Game Flow Implementation Notes
@@ -215,7 +219,7 @@ The intended game loop is:
 2. User enters a text description of what they see
 3. System creates a `pending` generation record with the prompt
 4. User is redirected to generating page which polls for completion
-5. System calls Gemini API to generate a new image in background
+5. System calls NVIDIA NIM API (FLUX.1-schnell) to generate a new image in background
 6. System saves image to local filesystem and updates record to `completed`
 7. User is redirected to result page showing the transformation chain
 8. User can now view the historical chain leading to their contribution

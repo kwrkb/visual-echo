@@ -133,3 +133,24 @@ Phase 3 (観察体験) ← スキーマ変更 (contributor_id)、Phase 1-2前提
 - npm test: 5 ファイル / 25 テスト / 全パス
 - npm run build: 成功（Next 16.2.7 / Turbopack）
 - npm run lint: エラー 0 件
+
+---
+
+## 画像生成 NVIDIA NIM 移行 + Supabase 新APIキー方式 ✅ 完了（2026-06-08）
+
+### Why
+Gemini API キーが閉鎖中で画像生成が一度も実動作検証できていなかった。ユーザーが NVIDIA NIM を導入したため画像生成を切り替え。さらに検証中に Supabase の legacy `service_role` キーが "Invalid API key" となったため、新 API キー方式（publishable / secret）へ移行。
+
+### 実装内容
+- [x] 画像生成を Gemini → NVIDIA NIM (FLUX.1-schnell) へ。`lib/gemini/client.ts` → `lib/nim/client.ts`、標準 `fetch` 実装、`@google/genai` 削除
+- [x] レスポンス両対応パース（`artifacts[0].base64` / `data[0].b64_json`）+ JPEG/PNG をマジックバイトで拡張子判定
+- [x] Supabase キー: `NEXT_PUBLIC_SUPABASE_ANON_KEY` → `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`、`SUPABASE_SERVICE_ROLE_KEY` → `SUPABASE_SECRET_KEY`（コードは変数名置換のみ）
+- [x] ドキュメント同期（CLAUDE.md / README.md / SETUP.md / docs/DESIGN.md / .env.local.example）
+- [x] ローカル起動: `op.exe run` + `WSLENV` で `op://` 参照を解決して dev 起動（`.wslenv.env`）
+
+### 検証（ライブ end-to-end）
+- `/create` → `createGeneration`（pending）→ `after()` → NVIDIA NIM 生成（JPEG）→ DB `completed` → result ページ → ギャラリー表示まで実機確認
+- npm lint / test（25件）/ build すべてパス
+
+### 残（ユーザー作業）
+- `.env.local`（1Password `op://` 参照）の新キーへの更新は完了済み

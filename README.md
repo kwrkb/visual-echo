@@ -7,14 +7,14 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green?logo=supabase)](https://supabase.com/)
-[![Google Gemini](https://img.shields.io/badge/Google-Gemini_2.5-orange?logo=google)](https://ai.google.dev/)
+[![NVIDIA NIM](https://img.shields.io/badge/NVIDIA-NIM_FLUX.1--schnell-76b900?logo=nvidia)](https://build.nvidia.com/black-forest-labs/flux_1-schnell)
 
 ## ✨ 特徴
 
 - 🌳 **ツリー構造**: Gitのブランチのように、1つの画像から複数の解釈が分岐
 - 🔄 **非同期処理**: リアルタイム性を必要とせず、自分のペースでプレイ可能
 - 🎯 **視覚化**: インタラクティブなツリービューで全体の連鎖を俯瞰
-- 🎨 **AI生成**: Google Gemini 2.5 Flash Imageによる高品質な画像生成
+- 🎨 **AI生成**: NVIDIA NIM (FLUX.1-schnell) による高速・高品質な画像生成
 - 📊 **系譜追跡**: 画像の誕生から現在まで、すべての変遷を追跡可能
 
 ## 🖼️ スクリーンショット
@@ -35,7 +35,7 @@
 | Frontend | Next.js 15 (App Router) | React 19ベースのフルスタックフレームワーク |
 | Language | TypeScript 5 | 型安全な開発環境 |
 | Database | Supabase (PostgreSQL) | リアルタイムデータベース |
-| AI Model | Google Gemini 2.5 Flash Image | Text-to-Image生成 |
+| AI Model | NVIDIA NIM / FLUX.1-schnell | Text-to-Image生成 |
 | Styling | Tailwind CSS | ユーティリティファーストCSS |
 | Storage | Local Filesystem | 生成画像の保存 (`public/images/generated/`) |
 
@@ -49,14 +49,14 @@ sequenceDiagram
     participant ServerAction as Next.js Server Action
     participant DB as Supabase DB
     participant Background as Background Process
-    participant Gemini as Google Gemini API
+    participant NIM as NVIDIA NIM API
     participant LocalFS as Local Filesystem
 
     User->>ServerAction: 1. 説明テキスト送信
     ServerAction->>DB: 2. Pending生成レコード作成
     ServerAction->>Background: 3. 非同期で画像生成開始
-    Background->>Gemini: 4. Prompt送信
-    Gemini->>Background: 5. 画像データ返却 (Base64)
+    Background->>NIM: 4. Prompt送信
+    NIM->>Background: 5. 画像データ返却 (Base64)
     Background->>LocalFS: 6. 画像保存
     Background->>DB: 7. メタデータ更新 (completed)
     User->>DB: 8. ポーリングで状態確認
@@ -84,7 +84,7 @@ sequenceDiagram
 
 - Node.js 20.9.0以上
 - Supabaseアカウント
-- Google Gemini APIキー
+- NVIDIA NIM APIキー（[build.nvidia.com](https://build.nvidia.com) で取得）
 
 ### インストール手順
 
@@ -110,18 +110,18 @@ cp .env.local.example .env.local
 `.env.local`を編集して、以下を設定:
 
 ```bash
-# Supabase設定（Project Settings → API から取得）
+# Supabase設定（Project Settings → API Keys から取得）
 NEXT_PUBLIC_SUPABASE_URL=your-project-url.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxx
 
 # サーバーサイドの書き込み用（RLS をバイパス）
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+SUPABASE_SECRET_KEY=sb_secret_xxx
 
-# Google Gemini API設定（https://makersuite.google.com/app/apikey から取得）
-GEMINI_API_KEY=your-gemini-api-key
+# NVIDIA NIM API設定（https://build.nvidia.com でサインアップ → API Key を取得）
+NVIDIA_NIM_API_KEY=your-nvidia-nim-api-key
 
-# オプション: モデル指定（デフォルト: gemini-2.5-flash-image）
-GEMINI_MODEL=gemini-2.5-flash-image
+# オプション: モデル指定（デフォルト: black-forest-labs/flux.1-schnell）
+NVIDIA_NIM_MODEL=black-forest-labs/flux.1-schnell
 ```
 
 4. **データベースのセットアップ**
@@ -211,7 +211,7 @@ visual-echo/
 ├── components/              # Reactコンポーネント
 ├── lib/                     # ライブラリ・ユーティリティ
 │   ├── supabase/           # Supabaseクライアント
-│   ├── gemini/             # Gemini APIクライアント
+│   ├── nim/                # NVIDIA NIM クライアント
 │   └── queries/            # データベースクエリ
 ├── types/                   # TypeScript型定義
 ├── supabase/               # データベース関連
@@ -228,7 +228,7 @@ visual-echo/
 本アプリケーションは生成された画像をローカルファイルシステムに保存します。本番環境にデプロイする場合は、Supabase StorageやCloudinaryなどのクラウドストレージへの移行が必要です。
 
 ### API利用料金
-Google Gemini APIの使用により料金が発生する可能性があります。詳細は[Gemini API Pricing](https://ai.google.dev/pricing)をご確認ください。
+NVIDIA NIM APIは一定の無料枠がありますが、超過後は料金が発生する可能性があります。詳細は[NVIDIA NIM Pricing](https://build.nvidia.com)をご確認ください。
 
 ### データベースポリシー
 開発用に全ユーザーが読み書き可能なRLSポリシーが設定されています。本番環境では適切な認証・認可ポリシーを設定してください。
@@ -247,7 +247,7 @@ Issue・Pull Requestを歓迎します！
 
 ---
 
-**Made with ❤️ using Next.js, Supabase, and Google Gemini AI**
+**Made with ❤️ using Next.js, Supabase, and NVIDIA NIM (FLUX.1-schnell)**
 
 ---
 
@@ -260,14 +260,14 @@ Describe an image in words, and AI will generate a new image based on your descr
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green?logo=supabase)](https://supabase.com/)
-[![Google Gemini](https://img.shields.io/badge/Google-Gemini_2.5-orange?logo=google)](https://ai.google.dev/)
+[![NVIDIA NIM](https://img.shields.io/badge/NVIDIA-NIM_FLUX.1--schnell-76b900?logo=nvidia)](https://build.nvidia.com/black-forest-labs/flux_1-schnell)
 
 ## ✨ Features
 
 - 🌳 **Tree Structure**: Just like Git branches, multiple interpretations branch out from a single image.
 - 🔄 **Asynchronous Processing**: No real-time requirement; play at your own pace.
 - 🎯 **Visualization**: Overview the entire chain with an interactive tree view.
-- 🎨 **AI Generation**: High-quality image generation using Google Gemini 2.5 Flash Image.
+- 🎨 **AI Generation**: Fast, high-quality image generation using NVIDIA NIM (FLUX.1-schnell).
 - 📊 **Genealogy Tracking**: Track every transition from the image's birth to the present.
 
 ## 🖼️ Screenshots
@@ -288,7 +288,7 @@ Visually displays the genealogy of an image (from root to current) and allows ad
 | Frontend | Next.js 15 (App Router) | React 19-based full-stack framework |
 | Language | TypeScript 5 | Type-safe development environment |
 | Database | Supabase (PostgreSQL) | Real-time database |
-| AI Model | Google Gemini 2.5 Flash Image | Text-to-Image generation |
+| AI Model | NVIDIA NIM / FLUX.1-schnell | Text-to-Image generation |
 | Styling | Tailwind CSS | Utility-first CSS |
 | Storage | Local Filesystem | Saving generated images (`public/images/generated/`) |
 
@@ -302,14 +302,14 @@ sequenceDiagram
     participant ServerAction as Next.js Server Action
     participant DB as Supabase DB
     participant Background as Background Process
-    participant Gemini as Google Gemini API
+    participant NIM as NVIDIA NIM API
     participant LocalFS as Local Filesystem
 
     User->>ServerAction: 1. Send description text
     ServerAction->>DB: 2. Create Pending generation record
     ServerAction->>Background: 3. Start image generation asynchronously
-    Background->>Gemini: 4. Send Prompt
-    Gemini->>Background: 5. Return image data (Base64)
+    Background->>NIM: 4. Send Prompt
+    NIM->>Background: 5. Return image data (Base64)
     Background->>LocalFS: 6. Save image
     Background->>DB: 7. Update metadata (completed)
     User->>DB: 8. Check status via polling
@@ -337,7 +337,7 @@ sequenceDiagram
 
 - Node.js 20.9.0 or higher
 - Supabase Account
-- Google Gemini API Key
+- NVIDIA NIM API Key (Get from [build.nvidia.com](https://build.nvidia.com))
 
 ### Installation Steps
 
@@ -363,15 +363,15 @@ cp .env.local.example .env.local
 Edit `.env.local` and set the following:
 
 ```bash
-# Supabase Configuration (Get from Project Settings → API)
+# Supabase Configuration (Get from Project Settings → API Keys)
 NEXT_PUBLIC_SUPABASE_URL=your-project-url.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxx
 
-# Google Gemini API Configuration (Get from https://makersuite.google.com/app/apikey)
-GEMINI_API_KEY=your-gemini-api-key
+# NVIDIA NIM API Configuration (Get from https://build.nvidia.com)
+NVIDIA_NIM_API_KEY=your-nvidia-nim-api-key
 
-# Optional: Model specification (Default: gemini-2.5-flash-image)
-GEMINI_MODEL=gemini-2.5-flash-image
+# Optional: Model specification (Default: black-forest-labs/flux.1-schnell)
+NVIDIA_NIM_MODEL=black-forest-labs/flux.1-schnell
 ```
 
 4. **Database Setup**
@@ -461,7 +461,7 @@ visual-echo/
 ├── components/              # React components
 ├── lib/                     # Libraries & Utilities
 │   ├── supabase/           # Supabase client
-│   ├── gemini/             # Gemini API client
+│   ├── nim/                # NVIDIA NIM client
 │   └── queries/            # Database queries
 ├── types/                   # TypeScript type definitions
 ├── supabase/               # Database related
@@ -478,7 +478,7 @@ visual-echo/
 This application saves generated images to the local filesystem. To deploy to a production environment, migration to cloud storage such as Supabase Storage or Cloudinary is required.
 
 ### API Usage Costs
-Charges may apply for using the Google Gemini API. Please check [Gemini API Pricing](https://ai.google.dev/pricing) for details.
+NVIDIA NIM API has a free tier, but charges may apply after the quota is exceeded. Please check [NVIDIA NIM](https://build.nvidia.com) for details.
 
 ### Database Policy
 For development, an RLS policy allowing read/write for all users is set. Please set appropriate authentication/authorization policies for production.
