@@ -33,6 +33,12 @@ yarn-error.log*
 .env*.local
 .env
 
+# WSL + op.exe ローカル起動補助（WSLENV 定義、秘密なし・環境依存）
+/.wslenv.env
+
+# playwright-cli の出力（スナップショット・ログ）
+/.playwright-cli/
+
 # vercel
 .vercel
 

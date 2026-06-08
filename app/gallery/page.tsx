@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { sample } from "@/lib/sample";
 import { ImageGrid } from "./components/ImageGrid";
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -27,8 +28,9 @@ export default async function GalleryPage() {
     );
   }
 
-  const shuffled = [...(allGenerations || [])].sort(() => Math.random() - 0.5);
-  const displayGenerations = shuffled.slice(0, 3);
+  // 全件から 3 件を一様ランダムに選ぶ（部分 Fisher-Yates）
+  // Uint32Array のサイズを k=3 に固定するため、件数が増えても QuotaExceededError にならない
+  const displayGenerations = sample(allGenerations ?? [], 3);
 
   return (
     <div className="min-h-screen bg-ve-bg py-12">

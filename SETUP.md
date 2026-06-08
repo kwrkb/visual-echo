@@ -13,10 +13,11 @@
 ```json
 {
   "@supabase/supabase-js": "^2.86.2",
-  "@supabase/ssr": "^0.6.0",
-  "@google/generative-ai": "^0.24.1"
+  "@supabase/ssr": "^0.6.0"
 }
 ```
+
+> 画像生成は NVIDIA NIM の REST API を標準 `fetch` で呼び出すため、専用 SDK 依存はありません。
 
 ### ✅ 3. 環境変数テンプレート
 - `.env.local.example` - 共有用テンプレート
@@ -34,8 +35,8 @@
 ### ✅ 6. TypeScript型定義
 - `types/database.ts` - データベーススキーマの型定義
 
-### ✅ 7. Gemini APIクライアント
-- `lib/gemini/client.ts` - 画像生成用クライアント
+### ✅ 7. NVIDIA NIM クライアント
+- `lib/nim/client.ts` - 画像生成用クライアント（FLUX.1-schnell）
 
 ## 🚀 次のステップ
 
@@ -49,14 +50,14 @@
 
 # 2. Project Settings → API から取得
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxx
 
-# 3. Google AI Studio でAPIキーを取得
-# https://makersuite.google.com/app/apikey
-GEMINI_API_KEY=your-gemini-api-key-here
+# 3. NVIDIA NIM でAPIキーを取得
+# https://build.nvidia.com
+NVIDIA_NIM_API_KEY=your-nvidia-nim-api-key-here
 
 # 4. (オプション) 使用するモデルを指定
-GEMINI_MODEL=gemini-2.0-flash-exp
+NVIDIA_NIM_MODEL=black-forest-labs/flux.1-schnell
 ```
 
 ### 2. データベースのセットアップ
@@ -90,7 +91,7 @@ visual-echo/
 │   │   ├── client.ts       # クライアント用
 │   │   ├── server.ts       # サーバー用
 │   │   └── middleware.ts   # middleware用
-│   └── gemini/             # Gemini API
+│   └── nim/                # NVIDIA NIM API
 │       └── client.ts       # 画像生成クライアント
 ├── types/                   # TypeScript型定義
 │   └── database.ts         # データベーススキーマ型
@@ -108,7 +109,7 @@ visual-echo/
 | Language | TypeScript | 5.x |
 | UI | Tailwind CSS | 3.4.x |
 | Database | Supabase (PostgreSQL) | - |
-| AI | Google Gemini API | 2.0 |
+| AI | NVIDIA NIM (FLUX.1-schnell) | - |
 
 ## 📝 開発時の注意点
 
@@ -137,5 +138,5 @@ const { data, error } = await supabase
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Supabase Documentation](https://supabase.com/docs)
-- [Google Gemini API](https://ai.google.dev/)
+- [NVIDIA NIM](https://build.nvidia.com/)
 - [Tailwind CSS](https://tailwindcss.com/docs)

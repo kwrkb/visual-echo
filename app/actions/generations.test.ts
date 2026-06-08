@@ -21,8 +21,8 @@ vi.mock("@/lib/supabase/admin", () => ({
   })),
 }));
 
-// Gemini クライアントのモック
-vi.mock("@/lib/gemini/client", () => ({
+// NIM クライアントのモック
+vi.mock("@/lib/nim/client", () => ({
   generateImage: vi.fn(async () => "/images/generated/test.png"),
 }));
 

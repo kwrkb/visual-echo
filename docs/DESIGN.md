@@ -246,8 +246,8 @@ xl:  1280px - ノートPC
   "framework": "nextjs",
   "env": {
     "NEXT_PUBLIC_SUPABASE_URL": "@supabase-url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase-anon-key",
-    "GEMINI_API_KEY": "@gemini-api-key"
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "@supabase-publishable-key",
+    "NVIDIA_NIM_API_KEY": "@nvidia-nim-api-key"
   }
 }
 ```

@@ -18,8 +18,8 @@ export function createMockSupabase(
   const mock = {
     rpc: vi.fn((name: string, args?: Record<string, unknown>) => {
       void args;
-      if (name in rpcResults) {
-        return Promise.resolve(rpcResults[name]);
+      if (Object.prototype.hasOwnProperty.call(rpcResults, name)) {
+        return Promise.resolve(rpcResults[name as RpcName]!);
       }
       return Promise.resolve({ data: null, error: { message: `Unknown RPC: ${name}` } });
     }),
