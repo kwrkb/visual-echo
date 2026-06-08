@@ -27,9 +27,16 @@ export default async function GalleryPage() {
     );
   }
 
-  const shuffled = [...(allGenerations || [])].sort(
-    () => crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000 - 0.5
-  );
+  // Fisher-Yates シャッフル: 乱数を一括取得し O(N) で偏りなくシャッフルする
+  // (sort(() => rand - 0.5) はバイアスがあり、比較関数ごとの乱数生成はGC負荷も高い)
+  const shuffled = [...(allGenerations || [])];
+  if (shuffled.length > 0) {
+    const randomValues = crypto.getRandomValues(new Uint32Array(shuffled.length));
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = randomValues[i] % (i + 1);
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+  }
   const displayGenerations = shuffled.slice(0, 3);
 
   return (
