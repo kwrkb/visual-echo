@@ -100,6 +100,31 @@ secret キーは内部で `service_role` ロールにマップされる。`supab
 
 ---
 
+---
+
+## 2026-06-09: /code-review high 指摘の修正
+
+### QuotaExceededError リグレッションの根本修正
+
+**判断**: `lib/sample.ts` に純粋関数 `sample<T>(arr, k)` を抽出し、gallery/page.tsx はそれを呼ぶだけにした。
+
+前回のレビュー対応（Fisher-Yates 導入）で `crypto.getRandomValues(new Uint32Array(全件数))` を書いたことで、completed 行数が 16,384 件を超えると `QuotaExceededError` が発生し gallery ページが 500 になるリグレッションを入れた。Web Crypto の 65,536 バイト上限（Uint32Array で 16,384 要素）の見落とし。
+
+修正は「全件シャッフルの後 3 件 slice」から「3 件だけを部分 Fisher-Yates でサンプリング」へのアルゴリズム是正。`Uint32Array(k)` のサイズは選択数に固定されるため、行数に依存しなくなった。
+
+ユーティリティ抽出の理由: 修正をテストで固定するため（純粋関数 → モックなしで回帰テスト可能）。`lib/sample.test.ts` に `sample(large(20000), 3)` が throw しないテストを追加。
+
+### nim/client.ts の cleanup 2 件
+
+**dead code 解消**: 拡張子判定の入れ子三項（PNG 分岐が両方 `"png"` で dead）を単一三項に簡約。コメントも実挙動（JPEG 以外は .png フォールバック）に合わせた。
+
+**未使用型フィールド削除**: `artifacts` の要素型から `finishReason?: string` を削除。コード中で参照しておらず、型が実際のレスポンスフィールドと一致するかも未確認のため。
+
+### 見送り: gallery の全件 fetch → RPC 化
+DB 側で `ORDER BY random() LIMIT 3` する RPC を追加するのが本筋だが、`schema.sql` の手動マイグレーションが要る。dev 段階のギャラリーには過剰。フォローアップ Issue 候補として残す。
+
+---
+
 ### eslint flat config 移行で新たに検出されたルール
 
 `app/gallery/page.tsx:30` の `Math.random()` が `react-hooks/purity` ルールに違反。

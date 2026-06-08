@@ -59,9 +59,7 @@ export async function generateImage(prompt: string): Promise<string> {
     const json = (await response.json()) as Record<string, unknown>;
 
     // レスポンス形式: artifacts[0].base64 (NVIDIA NIM 標準) または data[0].b64_json (OpenAI 互換フォールバック)
-    const artifacts = json.artifacts as
-      | Array<{ base64?: string; finishReason?: string }>
-      | undefined;
+    const artifacts = json.artifacts as Array<{ base64?: string }> | undefined;
     const data = json.data as Array<{ b64_json?: string }> | undefined;
     const base64 = artifacts?.[0]?.base64 ?? data?.[0]?.b64_json;
 
@@ -77,13 +75,8 @@ export async function generateImage(prompt: string): Promise<string> {
     // base64 → Buffer → ローカル保存
     const buffer = Buffer.from(base64, "base64");
 
-    // FLUX.1-schnell は JPEG を返すため、マジックバイトで実フォーマットを判定して拡張子を決める
-    const ext =
-      buffer[0] === 0xff && buffer[1] === 0xd8
-        ? "jpg"
-        : buffer[0] === 0x89 && buffer[1] === 0x50
-          ? "png"
-          : "png";
+    // FLUX.1-schnell は JPEG を返す。JPEG のマジックバイトなら .jpg、それ以外は .png にフォールバック
+    const ext = buffer[0] === 0xff && buffer[1] === 0xd8 ? "jpg" : "png";
 
     const publicDir = path.join(process.cwd(), "public", "images", "generated");
     await fs.mkdir(publicDir, { recursive: true });

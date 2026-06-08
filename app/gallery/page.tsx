@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { sample } from "@/lib/sample";
 import { ImageGrid } from "./components/ImageGrid";
 import { Container } from "@/components/ui/Container";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -27,17 +28,9 @@ export default async function GalleryPage() {
     );
   }
 
-  // Fisher-Yates シャッフル: 乱数を一括取得し O(N) で偏りなくシャッフルする
-  // (sort(() => rand - 0.5) はバイアスがあり、比較関数ごとの乱数生成はGC負荷も高い)
-  const shuffled = [...(allGenerations || [])];
-  if (shuffled.length > 0) {
-    const randomValues = crypto.getRandomValues(new Uint32Array(shuffled.length));
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = randomValues[i] % (i + 1);
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-  }
-  const displayGenerations = shuffled.slice(0, 3);
+  // 全件から 3 件を一様ランダムに選ぶ（部分 Fisher-Yates）
+  // Uint32Array のサイズを k=3 に固定するため、件数が増えても QuotaExceededError にならない
+  const displayGenerations = sample(allGenerations ?? [], 3);
 
   return (
     <div className="min-h-screen bg-ve-bg py-12">
