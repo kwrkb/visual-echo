@@ -125,7 +125,7 @@ Phase 3 (観察体験) ← スキーマ変更 (contributor_id)、Phase 1-2前提
 ### 誤算と判断
 - postcss moderate は Next 16.x 安定版（16.3.0-canary.5 未満）でも残存。
   `overrides` による強制アップグレードで解消（Next 15 でも可能だった）。
-- middleware.ts の proxy.ts 改名は意図的に保留（→ implementation-notes 参照）。
+- middleware.ts の proxy.ts 改名は意図的に保留（→ LESSONS.md 参照）。
 - Gemini API キー閉鎖中のため画像生成の実動作テストは未実施（PR チェックリスト参照）。
 
 ### 結果
